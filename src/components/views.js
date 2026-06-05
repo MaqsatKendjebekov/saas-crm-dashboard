@@ -204,6 +204,22 @@ export function renderDashboard(data) {
   `;
 }
 
+export function renderStatusLabel(state) {
+  if (state.loading) {
+    return "Syncing workspace";
+  }
+
+  if (state.backend === "live") {
+    return state.session?.user?.email ? `Supabase live · ${state.session.user.email}` : "Supabase live · public read";
+  }
+
+  if (state.configured) {
+    return "Supabase ready · demo mode";
+  }
+
+  return "Demo mode";
+}
+
 export function renderCustomers(data, state) {
   const rows = filterCustomers(data, state);
 
