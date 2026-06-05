@@ -242,6 +242,7 @@ function renderTopbar(state) {
 
 function renderApp(state) {
   document.body.dataset.theme = state.theme;
+  const data = state.appData || mockData;
 
   root.innerHTML = `
     <div class="app-shell">
@@ -400,6 +401,7 @@ document.addEventListener("drop", (event) => {
   event.preventDefault();
   const dealId = event.dataTransfer.getData("text/plain");
   const targetStage = dropZone.dataset.dropZone;
+  const data = store.state.appData || mockData;
   const deal = data.deals.find((item) => item.id === dealId);
 
   if (!deal || deal.stage === targetStage) {
