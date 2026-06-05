@@ -13,6 +13,12 @@ export const supabaseClient = supabaseEnabled
     })
   : null;
 
+function ensureClient() {
+  if (!supabaseClient) {
+    throw new Error("Supabase client is not configured.");
+  }
+}
+
 export async function getSession() {
   if (!supabaseClient) {
     return null;
@@ -39,6 +45,7 @@ export function onAuthStateChange(callback) {
 }
 
 export async function signInWithPassword(email, password) {
+  ensureClient();
   const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
   if (error) {
     throw error;
@@ -46,6 +53,7 @@ export async function signInWithPassword(email, password) {
 }
 
 export async function signUpWithPassword(email, password) {
+  ensureClient();
   const { error } = await supabaseClient.auth.signUp({ email, password });
   if (error) {
     throw error;
@@ -53,6 +61,7 @@ export async function signUpWithPassword(email, password) {
 }
 
 export async function signOut() {
+  ensureClient();
   const { error } = await supabaseClient.auth.signOut();
   if (error) {
     throw error;
@@ -60,6 +69,7 @@ export async function signOut() {
 }
 
 export async function signInWithOAuth(provider) {
+  ensureClient();
   const { error } = await supabaseClient.auth.signInWithOAuth({
     provider,
     options: {
@@ -76,8 +86,9 @@ export function isOAuthEnabled(provider) {
   return Boolean(oauthConfig[provider]);
 }
 
-async function selectAll(table) {
-  const { data, error } = await supabaseClient.from(table).select("*");
+async function selectAll(table, orderBy = "created_at", ascending = false) {
+  ensureClient();
+  const { data, error } = await supabaseClient.from(table).select("*").order(orderBy, { ascending });
   if (error) {
     throw error;
   }
@@ -86,11 +97,11 @@ async function selectAll(table) {
 
 export async function fetchWorkspaceData() {
   const [customers, deals, tasks, invoices, activity] = await Promise.all([
-    selectAll("customers"),
-    selectAll("deals"),
-    selectAll("tasks"),
-    selectAll("invoices"),
-    selectAll("activity")
+    selectAll("customers", "created_at", false),
+    selectAll("deals", "created_at", false),
+    selectAll("tasks", "created_at", false),
+    selectAll("invoices", "created_at", false),
+    selectAll("activity", "created_at", false)
   ]);
 
   return {
@@ -98,8 +109,23 @@ export async function fetchWorkspaceData() {
     deals,
     tasks,
     invoices,
-    activity,
-    revenueTrend: [72, 78, 84, 87, 96, 109, 116, 129, 141, 148, 162, 176],
-    churnTrend: [4.8, 4.1, 3.9, 3.7, 3.5, 3.6, 3.3, 3.1, 2.9, 2.8, 2.6, 2.4]
+    activity
   };
+}
+
+export async function insertRecord(table, payload) {
+  ensureClient();
+  const { data, error } = await supabaseClient.from(table).insert(payload).select().single();
+  if (error) {
+    throw error;
+  }
+  return data;
+}
+
+export async function updateDealStage(dealId, stage) {
+  ensureClient();
+  const { error } = await supabaseClient.from("deals").update({ stage }).eq("id", dealId);
+  if (error) {
+    throw error;
+  }
 }
