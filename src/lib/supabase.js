@@ -58,6 +58,19 @@ export async function signOut() {
   }
 }
 
+export async function signInWithOAuth(provider) {
+  const { error } = await supabaseClient.auth.signInWithOAuth({
+    provider,
+    options: {
+      redirectTo: window.location.href
+    }
+  });
+
+  if (error) {
+    throw error;
+  }
+}
+
 async function selectAll(table) {
   const { data, error } = await supabaseClient.from(table).select("*");
   if (error) {
