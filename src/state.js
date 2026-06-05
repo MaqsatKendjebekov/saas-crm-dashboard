@@ -9,6 +9,7 @@ export const views = {
 export const store = {
   state: {
     activeView: "dashboard",
+    appData: null,
     globalSearch: "",
     filters: {
       customers: "All",
@@ -18,7 +19,13 @@ export const store = {
     },
     drawer: null,
     theme: "dark",
-    toast: null
+    toast: null,
+    backend: "demo",
+    configured: false,
+    loading: true,
+    booting: true,
+    authMode: "signin",
+    session: null
   },
   listeners: new Set(),
   subscribe(listener) {
