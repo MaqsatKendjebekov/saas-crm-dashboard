@@ -68,36 +68,26 @@ drop policy if exists "auth can read customers" on public.customers;
 drop policy if exists "auth can manage customers" on public.customers;
 create policy "auth can read customers" on public.customers for select to authenticated using (true);
 create policy "auth can manage customers" on public.customers for all to authenticated using (true) with check (true);
-drop policy if exists "anon can read customers" on public.customers;
-create policy "anon can read customers" on public.customers for select to anon using (true);
 
 drop policy if exists "auth can read deals" on public.deals;
 drop policy if exists "auth can manage deals" on public.deals;
 create policy "auth can read deals" on public.deals for select to authenticated using (true);
 create policy "auth can manage deals" on public.deals for all to authenticated using (true) with check (true);
-drop policy if exists "anon can read deals" on public.deals;
-create policy "anon can read deals" on public.deals for select to anon using (true);
 
 drop policy if exists "auth can read tasks" on public.tasks;
 drop policy if exists "auth can manage tasks" on public.tasks;
 create policy "auth can read tasks" on public.tasks for select to authenticated using (true);
 create policy "auth can manage tasks" on public.tasks for all to authenticated using (true) with check (true);
-drop policy if exists "anon can read tasks" on public.tasks;
-create policy "anon can read tasks" on public.tasks for select to anon using (true);
 
 drop policy if exists "auth can read invoices" on public.invoices;
 drop policy if exists "auth can manage invoices" on public.invoices;
 create policy "auth can read invoices" on public.invoices for select to authenticated using (true);
 create policy "auth can manage invoices" on public.invoices for all to authenticated using (true) with check (true);
-drop policy if exists "anon can read invoices" on public.invoices;
-create policy "anon can read invoices" on public.invoices for select to anon using (true);
 
 drop policy if exists "auth can read activity" on public.activity;
 drop policy if exists "auth can manage activity" on public.activity;
 create policy "auth can read activity" on public.activity for select to authenticated using (true);
 create policy "auth can manage activity" on public.activity for all to authenticated using (true) with check (true);
-drop policy if exists "anon can read activity" on public.activity;
-create policy "anon can read activity" on public.activity for select to anon using (true);
 
 insert into public.customers (id, name, company, owner, plan, status, arr, health, last_activity, contacts, region, notes) values
 ('c-101', 'Northstar Labs', 'Northstar Labs', 'Elena Torres', 'Growth', 'Customer', 24000, 'Strong', '2026-06-03', 14, 'US East', 'Expanded into three teams after onboarding success.'),
