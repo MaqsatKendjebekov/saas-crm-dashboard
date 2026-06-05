@@ -3,7 +3,8 @@ export const views = {
   customers: "Customers",
   deals: "Deals",
   tasks: "Tasks",
-  billing: "Billing"
+  billing: "Billing",
+  control: "Control Center"
 };
 
 export const store = {
@@ -24,8 +25,12 @@ export const store = {
     configured: false,
     loading: true,
     booting: true,
+    language: "en",
     authMode: "signin",
-    session: null
+    session: null,
+    profileMenuOpen: false,
+    confirmDialog: null,
+    createType: "customer"
   },
   listeners: new Set(),
   subscribe(listener) {
