@@ -26,6 +26,7 @@ import { escapeHtml, initials } from "./utils/format.js";
 
 const root = document.getElementById("app");
 const THEME_KEY = "pulse-crm-theme";
+const LANG_KEY = "pulse-crm-language";
 const emptyWorkspace = Object.freeze({
   customers: [],
   deals: [],
@@ -37,8 +38,120 @@ const emptyWorkspace = Object.freeze({
 let toastTimer = null;
 
 store.setState({
-  theme: window.localStorage.getItem(THEME_KEY) || store.state.theme
+  theme: window.localStorage.getItem(THEME_KEY) || store.state.theme,
+  language: window.localStorage.getItem(LANG_KEY) || store.state.language
 });
+
+const copy = {
+  en: {
+    appTagline: "Private SaaS workspace",
+    browseLabel: "Workspace menu",
+    editLabel: "Edit mode",
+    dashboard: "Dashboard",
+    customers: "Customers",
+    deals: "Deals",
+    tasks: "Tasks",
+    billing: "Billing",
+    control: "Control Center",
+    guidedWorkspace: "Guided workspace",
+    guidedWorkspaceBody: "Main navigation is now horizontal at the top. Use it to browse. Use the big Create data action to enter edit mode.",
+    quickOrientation: "Quick orientation",
+    quickOrientationBody: "Browse from the top menu, inspect records from the cards and tables, and only switch into Control Center when you want to create or change the workspace.",
+    workspaceStatus: "Workspace status",
+    totalRecords: "total records across customers, deals, tasks and invoices.",
+    createData: "Create data",
+    editingWorkspace: "Editing workspace",
+    lightMode: "Light mode",
+    darkMode: "Dark mode",
+    searchPlaceholder: "Search customers, deals, tasks...",
+    openDashboardHint: "Open Dashboard to overview or Control Center to edit records.",
+    openControlCenter: "Open Control Center",
+    refreshWorkspace: "Refresh workspace",
+    signOut: "Sign out",
+    language: "Language",
+    signOutTitle: "Sign out from Pulse CRM?",
+    signOutMessage: "You are about to leave the secure workspace. Your session will close and you will return to the login screen.",
+    signOutConfirm: "Yes, sign out",
+    stayHere: "Stay here",
+    footer: "Every screen is private to the signed-in user. New data is created from Control Center, and logout always asks for confirmation first.",
+    authTitleSignin: "Sign in to enter your workspace",
+    authTitleSignup: "Create a secure Pulse CRM account",
+    authSignin: "Sign in",
+    authSignup: "Create account",
+    authSwitchSignin: "Already have an account? Sign in",
+    authSwitchSignup: "No account yet? Create one",
+    authIntro: "This workspace does not expose shared demo data anymore. Every customer, deal, task and invoice belongs only to the signed-in account.",
+    authAccess: "Private access only",
+    authUnlock: "Login required before any tools unlock",
+    menuMap: "Menu map",
+    firstRun: "First-run suggestion",
+    firstRunBody: "Create a customer first. After that, add a deal or task and the rest of the screens become much more intuitive immediately.",
+    whatAfterLogin: "What happens after login",
+    whatAfterLoginBody: "You land in a guided dashboard, then use the top menu and Control Center to create your first records.",
+    sessionPersistence: "Session persistence",
+    sessionPersistenceBody: "The session is cached by Supabase Auth, so refreshing or returning from background does not log you out unexpectedly.",
+    safety: "Safety",
+    safetyBody: "Passwords are handled by Supabase Auth. The app is using policy-protected API calls instead of raw SQL from the browser.",
+    themeToast: "Theme switched to",
+    signedOut: "Signed out successfully.",
+    signInFirst: "Sign in first.",
+    authConfigMissing: "Supabase is not configured yet."
+  },
+  ru: {
+    appTagline: "Приватное SaaS-пространство",
+    browseLabel: "Меню разделов",
+    editLabel: "Режим редактирования",
+    dashboard: "Дашборд",
+    customers: "Клиенты",
+    deals: "Сделки",
+    tasks: "Задачи",
+    billing: "Платежи",
+    control: "Центр управления",
+    guidedWorkspace: "Понятное пространство",
+    guidedWorkspaceBody: "Основная навигация теперь горизонтальная сверху. Используй ее для просмотра. Большая кнопка создания переводит в режим редактирования.",
+    quickOrientation: "Быстрая ориентация",
+    quickOrientationBody: "Смотри разделы через верхнее меню, открывай записи из карточек и таблиц, а в Control Center заходи только когда хочешь что-то создать или изменить.",
+    workspaceStatus: "Состояние пространства",
+    totalRecords: "записей всего по клиентам, сделкам, задачам и счетам.",
+    createData: "Создать данные",
+    editingWorkspace: "Редактирование",
+    lightMode: "Светлая тема",
+    darkMode: "Темная тема",
+    searchPlaceholder: "Поиск по клиентам, сделкам, задачам...",
+    openDashboardHint: "Открой дашборд для обзора или Control Center для редактирования записей.",
+    openControlCenter: "Открыть Control Center",
+    refreshWorkspace: "Обновить данные",
+    signOut: "Выйти",
+    language: "Язык",
+    signOutTitle: "Выйти из Pulse CRM?",
+    signOutMessage: "Ты собираешься покинуть защищенное пространство. Сессия завершится, и ты вернешься на экран входа.",
+    signOutConfirm: "Да, выйти",
+    stayHere: "Остаться",
+    footer: "Все экраны приватны для текущего пользователя. Новые данные создаются через Control Center, а выход всегда требует подтверждения.",
+    authTitleSignin: "Войди, чтобы открыть рабочее пространство",
+    authTitleSignup: "Создай защищенный аккаунт Pulse CRM",
+    authSignin: "Войти",
+    authSignup: "Создать аккаунт",
+    authSwitchSignin: "Уже есть аккаунт? Войти",
+    authSwitchSignup: "Еще нет аккаунта? Создать",
+    authIntro: "Здесь больше нет общих демо-данных. Каждый клиент, сделка, задача и счет принадлежат только текущему аккаунту.",
+    authAccess: "Только приватный доступ",
+    authUnlock: "Вход обязателен перед доступом к инструментам",
+    menuMap: "Карта меню",
+    firstRun: "Совет для старта",
+    firstRunBody: "Сначала создай клиента. Потом добавь сделку или задачу, и остальные экраны сразу станут намного понятнее.",
+    whatAfterLogin: "Что будет после входа",
+    whatAfterLoginBody: "Ты попадешь в понятный дашборд, а дальше через верхнее меню и Control Center сможешь создать первые записи.",
+    sessionPersistence: "Сохранение сессии",
+    sessionPersistenceBody: "Сессия хранится через Supabase Auth, поэтому обновление страницы или возврат из фона не выбрасывает тебя из аккаунта.",
+    safety: "Безопасность",
+    safetyBody: "Пароли обрабатывает Supabase Auth. Приложение использует API с политиками доступа, а не raw SQL из браузера.",
+    themeToast: "Тема переключена на",
+    signedOut: "Выход выполнен.",
+    signInFirst: "Сначала войди в аккаунт.",
+    authConfigMissing: "Supabase пока не настроен."
+  }
+};
 
 function cloneEmptyWorkspace() {
   return {
@@ -60,6 +173,11 @@ function flashToast(message) {
 
 function escape(value) {
   return escapeHtml(value);
+}
+
+function t(state, key) {
+  const language = state?.language === "ru" ? "ru" : "en";
+  return copy[language][key] || copy.en[key] || key;
 }
 
 function normalizeSupabaseData(appData) {
@@ -157,16 +275,33 @@ function filterOptions(activeView) {
   }
 }
 
+function renderWorkspaceNav(state) {
+  const items = [
+    { id: "dashboard", label: t(state, "dashboard") },
+    { id: "customers", label: t(state, "customers") },
+    { id: "deals", label: t(state, "deals") },
+    { id: "tasks", label: t(state, "tasks") },
+    { id: "billing", label: t(state, "billing") }
+  ];
+
+  return `
+    <nav class="nav-strip" aria-label="Workspace sections">
+      ${items
+        .map(
+          (item) => `
+            <button class="nav-pill ${state.activeView === item.id ? "is-active" : ""}" data-nav="${item.id}" type="button">
+              ${escape(item.label)}
+            </button>
+          `
+        )
+        .join("")}
+    </nav>
+  `;
+}
+
 function renderSidebar(state) {
   const data = currentWorkspace();
-  const navItems = [
-    { id: "dashboard", label: views.dashboard, meta: "Start here" },
-    { id: "customers", label: views.customers, meta: `${data.customers.length} records` },
-    { id: "deals", label: views.deals, meta: `${data.deals.length} in motion` },
-    { id: "tasks", label: views.tasks, meta: `${data.tasks.length} to track` },
-    { id: "billing", label: views.billing, meta: `${data.invoices.length} invoices` },
-    { id: "control", label: views.control, meta: "Create data" }
-  ];
+  const totalRecords = data.customers.length + data.deals.length + data.tasks.length + data.invoices.length;
 
   return `
     <aside class="sidebar">
@@ -174,33 +309,22 @@ function renderSidebar(state) {
         <img class="brand__mark" src="./assets/pulse-logo.svg" alt="Pulse CRM logo" />
         <div>
           <h1>Pulse CRM</h1>
-          <p>Private SaaS workspace</p>
+          <p>${escape(t(state, "appTagline"))}</p>
         </div>
       </div>
       <div class="workspace-switcher">
-        <strong>Guided workspace</strong>
-        <div class="sidebar-copy">Left menu = product sections. Top-right profile = session controls. Control Center = create new records.</div>
+        <strong>${escape(t(state, "guidedWorkspace"))}</strong>
+        <div class="sidebar-copy">${escape(t(state, "guidedWorkspaceBody"))}</div>
       </div>
-      <nav class="nav-list" aria-label="Primary navigation">
-        ${navItems
-          .map(
-            (item) => `
-              <button class="nav-button ${state.activeView === item.id ? "is-active" : ""}" data-nav="${item.id}" type="button">
-                <span>${escape(item.label)}</span>
-                <span class="nav-button__meta">${escape(item.meta)}</span>
-              </button>
-            `
-          )
-          .join("")}
-      </nav>
       <div class="sidebar-footer">
         <div class="sidebar-card">
-          <strong>How to use this</strong>
-          <div class="sidebar-copy">1. Open Control Center. 2. Add a customer or deal. 3. Come back to Dashboard and the empty guide disappears automatically.</div>
+          <strong>${escape(t(state, "quickOrientation"))}</strong>
+          <div class="sidebar-copy">${escape(t(state, "quickOrientationBody"))}</div>
         </div>
         <div class="sidebar-card">
-          <strong>Workspace status</strong>
+          <strong>${escape(t(state, "workspaceStatus"))}</strong>
           <div class="sidebar-copy">${renderStatusLabel(state)}</div>
+          <div class="sidebar-copy sidebar-copy--strong">${totalRecords} ${escape(t(state, "totalRecords"))}</div>
         </div>
       </div>
     </aside>
@@ -232,9 +356,16 @@ function renderProfileMenu(state) {
                 <strong>${escape(profile.name)}</strong>
                 <span class="muted">${escape(profile.email)}</span>
               </div>
-              <button class="profile-dropdown__action" data-open-control="true" type="button">Open Control Center</button>
-              <button class="profile-dropdown__action" data-sync-data="true" type="button">Refresh workspace</button>
-              <button class="profile-dropdown__action is-danger" data-request-signout="true" type="button">Sign out</button>
+              <div class="language-switcher">
+                <span class="language-switcher__label">${escape(t(state, "language"))}</span>
+                <div class="language-switcher__actions">
+                  <button class="language-pill ${state.language === "en" ? "is-active" : ""}" data-language-switch="en" type="button">EN</button>
+                  <button class="language-pill ${state.language === "ru" ? "is-active" : ""}" data-language-switch="ru" type="button">RU</button>
+                </div>
+              </div>
+              <button class="profile-dropdown__action" data-open-control="true" type="button">${escape(t(state, "openControlCenter"))}</button>
+              <button class="profile-dropdown__action" data-sync-data="true" type="button">${escape(t(state, "refreshWorkspace"))}</button>
+              <button class="profile-dropdown__action is-danger" data-request-signout="true" type="button">${escape(t(state, "signOut"))}</button>
             </div>
           `
           : ""
@@ -247,33 +378,43 @@ function renderTopbar(state) {
   const copy = viewDescription(state.activeView);
   const options = filterOptions(state.activeView);
   const activeFilter = state.filters[state.activeView];
+  const isControlView = state.activeView === "control";
 
   return `
-    <header class="topbar">
+    <header class="topbar topbar--stacked">
+      <div class="topbar-row">
       <div class="topbar-copy">
-        <span class="label">Workspace menu</span>
+        <span class="label">${escape(isControlView ? t(state, "editLabel") : t(state, "browseLabel"))}</span>
         <h2 class="page-title">${escape(copy.title)}</h2>
         <p class="page-subtitle">${escape(copy.subtitle)}</p>
       </div>
       <div class="topbar-actions">
         <div class="status-chip"><span class="status-dot ${state.backend === "live" ? "is-live" : "is-demo"}"></span>${renderStatusLabel(state)}</div>
-        <label class="search" aria-label="Search">
-          <input type="search" value="${escape(state.globalSearch)}" placeholder="Search customers, deals, tasks..." data-search-input="true" />
-        </label>
-        ${
-          options.length
-            ? `
-              <select class="filter-select" data-filter-view="${state.activeView}">
-                ${options
-                  .map((option) => `<option value="${escape(option)}" ${option === activeFilter ? "selected" : ""}>${escape(option)}</option>`)
-                  .join("")}
-              </select>
-            `
-            : ""
-        }
-        <button class="icon-button" data-theme-toggle="true" type="button">${state.theme === "dark" ? "Light mode" : "Dark mode"}</button>
-        <button class="primary-button" data-open-control="true" type="button">Create data</button>
+        <button class="icon-button" data-theme-toggle="true" type="button">${escape(state.theme === "dark" ? t(state, "lightMode") : t(state, "darkMode"))}</button>
+        <button class="primary-button ${isControlView ? "is-active" : ""}" data-open-control="true" type="button">${escape(isControlView ? t(state, "editingWorkspace") : t(state, "createData"))}</button>
         ${renderProfileMenu(state)}
+      </div>
+      </div>
+      <div class="toolbar-surface">
+        <div class="toolbar-surface__main">
+          ${renderWorkspaceNav(state)}
+        </div>
+        <div class="toolbar-surface__actions">
+          <label class="search" aria-label="Search">
+            <input type="search" value="${escape(state.globalSearch)}" placeholder="${escape(t(state, "searchPlaceholder"))}" data-search-input="true" />
+          </label>
+          ${
+            options.length
+              ? `
+                <select class="filter-select" data-filter-view="${state.activeView}">
+                  ${options
+                    .map((option) => `<option value="${escape(option)}" ${option === activeFilter ? "selected" : ""}>${escape(option)}</option>`)
+                    .join("")}
+                </select>
+              `
+              : `<div class="filter-placeholder">${escape(t(state, "openDashboardHint"))}</div>`
+          }
+        </div>
       </div>
     </header>
   `;
@@ -312,7 +453,7 @@ function renderConfirmDialog(state) {
         <h3>${escape(state.confirmDialog.title)}</h3>
         <p class="muted">${escape(state.confirmDialog.message)}</p>
         <div class="confirm-actions">
-          <button class="ghost-button" data-confirm-dismiss="true" type="button">Stay here</button>
+          <button class="ghost-button" data-confirm-dismiss="true" type="button">${escape(t(state, "stayHere"))}</button>
           <button class="primary-button danger-button" data-confirm-action="${escape(state.confirmDialog.action)}" type="button">${escape(state.confirmDialog.confirmLabel)}</button>
         </div>
       </div>
@@ -321,9 +462,9 @@ function renderConfirmDialog(state) {
 }
 
 function renderAuthScreen(state) {
-  const authHeadline = state.authMode === "signup" ? "Create a secure Pulse CRM account" : "Sign in to enter your workspace";
-  const authButton = state.authMode === "signup" ? "Create account" : "Sign in";
-  const switchText = state.authMode === "signup" ? "Already have an account? Sign in" : "No account yet? Create one";
+  const authHeadline = state.authMode === "signup" ? t(state, "authTitleSignup") : t(state, "authTitleSignin");
+  const authButton = state.authMode === "signup" ? t(state, "authSignup") : t(state, "authSignin");
+  const switchText = state.authMode === "signup" ? t(state, "authSwitchSignin") : t(state, "authSwitchSignup");
   const googleEnabled = isOAuthEnabled("google");
   const githubEnabled = isOAuthEnabled("github");
   const disabledMessage = !supabaseEnabled ? "Supabase is not configured yet, so registration is temporarily unavailable." : "";
@@ -335,12 +476,12 @@ function renderAuthScreen(state) {
           <img class="auth-brand__mark" src="./assets/pulse-logo.svg" alt="Pulse CRM logo" />
           <div>
             <h1>Pulse CRM</h1>
-            <p class="muted">Login required before any tools unlock</p>
+            <p class="muted">${escape(t(state, "authUnlock"))}</p>
           </div>
         </div>
-        <span class="label">Private access only</span>
+        <span class="label">${escape(t(state, "authAccess"))}</span>
         <h2 class="auth-title">${escape(authHeadline)}</h2>
-        <p class="auth-copy">This workspace does not expose shared demo data anymore. Every customer, deal, task and invoice belongs only to the signed-in account.</p>
+        <p class="auth-copy">${escape(t(state, "authIntro"))}</p>
         <form class="auth-form auth-form--page" data-auth-form="true">
           <input type="email" name="email" placeholder="Work email" autocomplete="email" required ${supabaseEnabled ? "" : "disabled"} />
           <input type="password" name="password" placeholder="Password" autocomplete="${state.authMode === "signup" ? "new-password" : "current-password"}" required minlength="8" ${supabaseEnabled ? "" : "disabled"} />
@@ -363,27 +504,27 @@ function renderAuthScreen(state) {
         }
         <div class="helper-list">
           <div class="helper-note">
-            <strong>What happens after login</strong>
-            <div class="muted">You land in a guided dashboard, then use the left menu and Control Center to create your first records.</div>
+            <strong>${escape(t(state, "whatAfterLogin"))}</strong>
+            <div class="muted">${escape(t(state, "whatAfterLoginBody"))}</div>
           </div>
           <div class="helper-note">
-            <strong>Session persistence</strong>
-            <div class="muted">The session is cached by Supabase Auth, so refreshing or returning from background does not log you out unexpectedly.</div>
+            <strong>${escape(t(state, "sessionPersistence"))}</strong>
+            <div class="muted">${escape(t(state, "sessionPersistenceBody"))}</div>
           </div>
           <div class="helper-note">
-            <strong>Safety</strong>
-            <div class="muted">Passwords are handled by Supabase Auth. The app is using policy-protected API calls instead of raw SQL from the browser.</div>
+            <strong>${escape(t(state, "safety"))}</strong>
+            <div class="muted">${escape(t(state, "safetyBody"))}</div>
           </div>
         </div>
       </section>
       <aside class="auth-side">
         <div class="sidebar-card feature-card">
-          <strong>Menu map</strong>
+          <strong>${escape(t(state, "menuMap"))}</strong>
           <div class="sidebar-copy">Dashboard = overview, Customers = accounts, Deals = pipeline, Tasks = execution, Billing = invoices, Control Center = create data.</div>
         </div>
         <div class="sidebar-card feature-card">
-          <strong>First-run suggestion</strong>
-          <div class="sidebar-copy">Create a customer first. After that, add a deal or task and the rest of the screens become much more intuitive immediately.</div>
+          <strong>${escape(t(state, "firstRun"))}</strong>
+          <div class="sidebar-copy">${escape(t(state, "firstRunBody"))}</div>
         </div>
       </aside>
       ${renderLoadingOverlay(state)}
@@ -419,8 +560,10 @@ function renderApp(state) {
       ${renderSidebar(state)}
       <main class="main">
         ${renderTopbar(state)}
-        ${renderView(state)}
-        <div class="footer-note">Every screen is private to the signed-in user. New data is created from Control Center, and logout always asks for confirmation first.</div>
+        <div class="view-stack">
+          ${renderView(state)}
+        </div>
+        <div class="footer-note">${escape(t(state, "footer"))}</div>
       </main>
     </div>
     ${renderDrawer(data, state.drawer)}
@@ -595,7 +738,7 @@ async function handleCreate(type, form) {
   const session = store.state.session;
 
   if (!session) {
-    flashToast("Sign in first.");
+    flashToast(t(store.state, "signInFirst"));
     return;
   }
 
@@ -637,7 +780,7 @@ async function confirmSignOut() {
       loading: false,
       booting: false
     });
-    flashToast("Signed out successfully.");
+    flashToast(t(store.state, "signedOut"));
   } catch (error) {
     store.setState({ loading: false, booting: false });
     flashToast(error.message);
@@ -653,7 +796,7 @@ document.addEventListener("click", (event) => {
   }
 
   const target = event.target.closest(
-    "[data-nav], [data-open-drawer], [data-close-drawer], [data-theme-toggle], [data-open-control], [data-profile-toggle], [data-request-signout], [data-toggle-auth], [data-sync-data], [data-oauth-provider], [data-create-type], [data-confirm-action], [data-confirm-dismiss]"
+    "[data-nav], [data-open-drawer], [data-close-drawer], [data-theme-toggle], [data-open-control], [data-profile-toggle], [data-request-signout], [data-toggle-auth], [data-sync-data], [data-oauth-provider], [data-create-type], [data-confirm-action], [data-confirm-dismiss], [data-language-switch]"
   );
 
   if (!target) {
@@ -690,7 +833,7 @@ document.addEventListener("click", (event) => {
     const nextTheme = store.state.theme === "dark" ? "light" : "dark";
     window.localStorage.setItem(THEME_KEY, nextTheme);
     store.setState({ theme: nextTheme });
-    flashToast(`Theme switched to ${nextTheme}.`);
+    flashToast(`${t(store.state, "themeToast")} ${nextTheme}.`);
     return;
   }
 
@@ -710,13 +853,20 @@ document.addEventListener("click", (event) => {
     return;
   }
 
+  if (target.dataset.languageSwitch) {
+    const nextLanguage = target.dataset.languageSwitch === "ru" ? "ru" : "en";
+    window.localStorage.setItem(LANG_KEY, nextLanguage);
+    store.setState({ language: nextLanguage, profileMenuOpen: true });
+    return;
+  }
+
   if (target.dataset.requestSignout) {
     store.setState({
       confirmDialog: {
         action: "signout",
-        confirmLabel: "Yes, sign out",
-        message: "You are about to leave the secure workspace. Your session will close and you will return to the login screen.",
-        title: "Sign out from Pulse CRM?"
+        confirmLabel: t(store.state, "signOutConfirm"),
+        message: t(store.state, "signOutMessage"),
+        title: t(store.state, "signOutTitle")
       },
       profileMenuOpen: false
     });
@@ -791,7 +941,7 @@ document.addEventListener("submit", async (event) => {
     event.preventDefault();
 
     if (!supabaseEnabled) {
-      flashToast("Supabase is not configured yet.");
+      flashToast(t(store.state, "authConfigMissing"));
       return;
     }
 
