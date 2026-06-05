@@ -1,17 +1,52 @@
 import { badgeTone, escapeHtml, formatCompact, formatCurrency, formatDate, initials } from "../utils/format.js";
 
 const dealStages = ["Discovery", "Qualified", "Proposal", "Negotiation"];
-const createTypes = [
-  { id: "customer", label: "Customer" },
-  { id: "deal", label: "Deal" },
-  { id: "task", label: "Task" },
-  { id: "invoice", label: "Invoice" }
-];
+function getCopy(language = "en") {
+  if (language === "ru") {
+    return {
+      createTypes: [
+        { id: "customer", label: "Клиент", hint: "Профиль аккаунта" },
+        { id: "deal", label: "Сделка", hint: "Движение в воронке" },
+        { id: "task", label: "Задача", hint: "Рабочее действие" },
+        { id: "invoice", label: "Счет", hint: "Платежная запись" }
+      ],
+      controlCenter: "Центр управления",
+      everythingStarts: "Все начинается здесь.",
+      createRecord: "Создать запись",
+      editingNow: "Сейчас редактируешь",
+      workspaceStatus: "Состояние пространства"
+    };
+  }
+
+  return {
+    createTypes: [
+      { id: "customer", label: "Customer", hint: "Account profile" },
+      { id: "deal", label: "Deal", hint: "Pipeline motion" },
+      { id: "task", label: "Task", hint: "Execution item" },
+      { id: "invoice", label: "Invoice", hint: "Billing entry" }
+    ],
+    controlCenter: "Control Center",
+    everythingStarts: "Everything starts here.",
+    createRecord: "Create A Record",
+    editingNow: "Editing now",
+    workspaceStatus: "Workspace Status"
+  };
+}
 
 const safe = escapeHtml;
 
 function renderBadge(value) {
   return `<span class="badge badge--${badgeTone(value)}">${safe(value)}</span>`;
+}
+
+function renderField(label, input, hint = "") {
+  return `
+    <label class="field-card">
+      <span class="field-card__label">${safe(label)}</span>
+      ${input}
+      ${hint ? `<span class="field-card__hint">${safe(hint)}</span>` : ""}
+    </label>
+  `;
 }
 
 function renderChart(values) {
@@ -520,91 +555,137 @@ function renderCreateForm(state) {
     case "deal":
       return `
         <form class="control-form" data-create-form="deal">
-          <input name="company" placeholder="Company name" required />
-          <input name="title" placeholder="Deal title" required />
-          <input name="owner" placeholder="Deal owner" required />
-          <input name="value" type="number" min="0" placeholder="Value in USD" required />
-          <select name="stage">
-            ${dealStages.map((stage) => `<option value="${stage}">${stage}</option>`).join("")}
-          </select>
-          <input name="dueDate" type="date" required />
-          <input name="probability" type="number" min="0" max="100" value="55" required />
-          <select name="type">
-            <option value="New Biz">New Biz</option>
-            <option value="Expansion">Expansion</option>
-            <option value="Enterprise">Enterprise</option>
-            <option value="Renewal">Renewal</option>
-          </select>
+          <div class="form-note">Use this when you want something to appear in the sales pipeline right away.</div>
+          <div class="field-grid">
+            ${renderField("Company", `<input name="company" placeholder="Acme Labs" required />`, "Which account this opportunity belongs to.")}
+            ${renderField("Deal title", `<input name="title" placeholder="Expansion package" required />`, "Short readable name for the opportunity.")}
+            ${renderField("Owner", `<input name="owner" placeholder="Ava Patel" required />`, "Person responsible for moving the deal.")}
+            ${renderField("Value", `<input name="value" type="number" min="0" placeholder="12000" required />`, "Expected contract value in USD.")}
+            ${renderField(
+              "Stage",
+              `<select name="stage">${dealStages.map((stage) => `<option value="${stage}">${stage}</option>`).join("")}</select>`,
+              "Current place in the pipeline."
+            )}
+            ${renderField("Due date", `<input name="dueDate" type="date" required />`, "When this opportunity should move next.")}
+            ${renderField("Probability", `<input name="probability" type="number" min="0" max="100" value="55" required />`, "Confidence level from 0 to 100.")}
+            ${renderField(
+              "Deal type",
+              `<select name="type">
+                <option value="New Biz">New Biz</option>
+                <option value="Expansion">Expansion</option>
+                <option value="Enterprise">Enterprise</option>
+                <option value="Renewal">Renewal</option>
+              </select>`,
+              "Helps separate new sales from renewals and expansions."
+            )}
+          </div>
           <button class="primary-button" type="submit">Create deal</button>
         </form>
       `;
     case "task":
       return `
         <form class="control-form" data-create-form="task">
-          <input name="title" placeholder="Task title" required />
-          <input name="customer" placeholder="Related customer" required />
-          <input name="assignee" placeholder="Assignee" required />
-          <select name="priority">
-            <option value="High">High</option>
-            <option value="Medium" selected>Medium</option>
-            <option value="Low">Low</option>
-          </select>
-          <select name="status">
-            <option value="Open">Open</option>
-            <option value="In Progress">In Progress</option>
-            <option value="Blocked">Blocked</option>
-            <option value="Done">Done</option>
-          </select>
-          <input name="dueDate" type="date" required />
-          <select name="lane">
-            <option value="Today">Today</option>
-            <option value="This Week" selected>This Week</option>
-            <option value="Completed">Completed</option>
-          </select>
+          <div class="form-note">Use tasks for next actions. This is the clearest way to make the workspace feel alive after customers or deals.</div>
+          <div class="field-grid">
+            ${renderField("Task title", `<input name="title" placeholder="Review proposal before call" required />`, "Action-oriented wording works best here.")}
+            ${renderField("Related customer", `<input name="customer" placeholder="Northstar Labs" required />`, "Optional in a real product, but useful for this MVP view.")}
+            ${renderField("Assignee", `<input name="assignee" placeholder="Jade Carter" required />`, "Who owns this action item.")}
+            ${renderField(
+              "Priority",
+              `<select name="priority">
+                <option value="High">High</option>
+                <option value="Medium" selected>Medium</option>
+                <option value="Low">Low</option>
+              </select>`,
+              "Controls urgency styling."
+            )}
+            ${renderField(
+              "Status",
+              `<select name="status">
+                <option value="Open">Open</option>
+                <option value="In Progress">In Progress</option>
+                <option value="Blocked">Blocked</option>
+                <option value="Done">Done</option>
+              </select>`,
+              "How far along the task already is."
+            )}
+            ${renderField("Due date", `<input name="dueDate" type="date" required />`, "When it should be completed.")}
+            ${renderField(
+              "Lane",
+              `<select name="lane">
+                <option value="Today">Today</option>
+                <option value="This Week" selected>This Week</option>
+                <option value="Completed">Completed</option>
+              </select>`,
+              "Where it appears in the workload snapshot."
+            )}
+          </div>
           <button class="primary-button" type="submit">Create task</button>
         </form>
       `;
     case "invoice":
       return `
         <form class="control-form" data-create-form="invoice">
-          <input name="company" placeholder="Company name" required />
-          <input name="amount" type="number" min="0" placeholder="Amount in USD" required />
-          <input name="dueDate" type="date" required />
-          <select name="status">
-            <option value="Pending">Pending</option>
-            <option value="Paid">Paid</option>
-            <option value="Overdue">Overdue</option>
-          </select>
+          <div class="form-note">Invoices are best once you already have customers or deals. They complete the billing story.</div>
+          <div class="field-grid">
+            ${renderField("Company", `<input name="company" placeholder="Orbit Education" required />`, "The account this invoice belongs to.")}
+            ${renderField("Amount", `<input name="amount" type="number" min="0" placeholder="1800" required />`, "Invoice amount in USD.")}
+            ${renderField("Due date", `<input name="dueDate" type="date" required />`, "Used to surface upcoming and overdue billing.")}
+            ${renderField(
+              "Status",
+              `<select name="status">
+                <option value="Pending">Pending</option>
+                <option value="Paid">Paid</option>
+                <option value="Overdue">Overdue</option>
+              </select>`,
+              "Choose how finance should read this line item."
+            )}
+          </div>
           <button class="primary-button" type="submit">Create invoice</button>
         </form>
       `;
     default:
       return `
         <form class="control-form" data-create-form="customer">
-          <input name="name" placeholder="Customer display name" required />
-          <input name="company" placeholder="Company name" required />
-          <input name="owner" placeholder="Owner name" required />
-          <select name="plan">
-            <option value="Starter">Starter</option>
-            <option value="Growth" selected>Growth</option>
-            <option value="Enterprise">Enterprise</option>
-          </select>
-          <select name="status">
-            <option value="New">New</option>
-            <option value="Qualified">Qualified</option>
-            <option value="Customer">Customer</option>
-            <option value="Churned">Churned</option>
-          </select>
-          <input name="arr" type="number" min="0" placeholder="Annual recurring revenue" required />
-          <select name="health">
-            <option value="Warm">Warm</option>
-            <option value="Strong">Strong</option>
-            <option value="Watch">Watch</option>
-            <option value="Critical">Critical</option>
-          </select>
-          <input name="contacts" type="number" min="1" value="1" required />
-          <input name="region" placeholder="Region" required />
-          <textarea name="notes" rows="4" placeholder="Short note about this customer"></textarea>
+          <div class="form-note">Best first record. Once a customer exists, the rest of the product becomes much easier to understand.</div>
+          <div class="field-grid">
+            ${renderField("Customer name", `<input name="name" placeholder="Northstar Labs" required />`, "Visible name used in cards, tables and drawers.")}
+            ${renderField("Company", `<input name="company" placeholder="Northstar Labs Inc." required />`, "Company or account name.")}
+            ${renderField("Owner", `<input name="owner" placeholder="Elena Torres" required />`, "Who manages the account relationship.")}
+            ${renderField(
+              "Plan",
+              `<select name="plan">
+                <option value="Starter">Starter</option>
+                <option value="Growth" selected>Growth</option>
+                <option value="Enterprise">Enterprise</option>
+              </select>`,
+              "Which package the customer is on."
+            )}
+            ${renderField(
+              "Status",
+              `<select name="status">
+                <option value="New">New</option>
+                <option value="Qualified">Qualified</option>
+                <option value="Customer">Customer</option>
+                <option value="Churned">Churned</option>
+              </select>`,
+              "Where the account sits in the lifecycle."
+            )}
+            ${renderField("ARR", `<input name="arr" type="number" min="0" placeholder="24000" required />`, "Annual recurring revenue in USD.")}
+            ${renderField(
+              "Health",
+              `<select name="health">
+                <option value="Warm">Warm</option>
+                <option value="Strong">Strong</option>
+                <option value="Watch">Watch</option>
+                <option value="Critical">Critical</option>
+              </select>`,
+              "How healthy the relationship currently feels."
+            )}
+            ${renderField("Contacts", `<input name="contacts" type="number" min="1" value="1" required />`, "How many people are attached to the account.")}
+            ${renderField("Region", `<input name="region" placeholder="US West" required />`, "Useful for segmenting the customer list.")}
+            ${renderField("Notes", `<textarea name="notes" rows="4" placeholder="Short note about this customer"></textarea>`, "Context you want to remember when reopening the drawer.")}
+          </div>
           <button class="primary-button" type="submit">Create customer</button>
         </form>
       `;
@@ -613,13 +694,15 @@ function renderCreateForm(state) {
 
 export function renderControl(data, state) {
   const empty = isWorkspaceEmpty(data);
+  const copy = getCopy(state.language);
+  const activeType = copy.createTypes.find((type) => type.id === state.createType) || copy.createTypes[0];
 
   return `
     <section class="control-layout">
       <article class="control-hero">
-        <span class="label">Control Center</span>
-        <h3>Everything starts here.</h3>
-        <p>Instead of hardcoded demo rows, this workspace lets you create your own records. Add one entry and the dashboard immediately stops showing the setup-only guidance.</p>
+        <span class="label">${safe(copy.controlCenter)}</span>
+        <h3>${safe(copy.everythingStarts)}</h3>
+        <p>Use this screen only for creation and workspace editing. The horizontal menu above is now purely for browsing and interacting with records.</p>
         <div class="control-steps">
           <div class="control-step"><strong>Start with a customer</strong><span>Best first record if you want the app to make immediate sense.</span></div>
           <div class="control-step"><strong>Then add a deal or task</strong><span>This gives the pipeline and execution sections something real to render.</span></div>
@@ -629,16 +712,22 @@ export function renderControl(data, state) {
       <article class="control-panel">
         <div class="section-header">
           <div>
-            <h3>Create A Record</h3>
+            <h3>${safe(copy.createRecord)}</h3>
             <p>Select the type, fill the form, and the empty onboarding state will disappear automatically.</p>
           </div>
         </div>
+        <div class="control-current">
+          <span class="control-current__label">${safe(copy.editingNow)}</span>
+          <strong>${safe(activeType.label)}</strong>
+          <span>${safe(activeType.hint)}</span>
+        </div>
         <div class="type-switcher">
-          ${createTypes
+          ${copy.createTypes
             .map(
               (type) => `
                 <button class="type-pill ${state.createType === type.id ? "is-active" : ""}" data-create-type="${type.id}" type="button">
-                  ${safe(type.label)}
+                  <span class="type-pill__title">${safe(type.label)}</span>
+                  <span class="type-pill__hint">${safe(type.hint)}</span>
                 </button>
               `
             )
@@ -649,7 +738,7 @@ export function renderControl(data, state) {
       <article class="control-panel control-panel--meta">
         <div class="section-header">
           <div>
-            <h3>Workspace Status</h3>
+            <h3>${safe(copy.workspaceStatus)}</h3>
             <p>${empty ? "You are starting from a clean state." : "You already have live records in this workspace."}</p>
           </div>
         </div>
