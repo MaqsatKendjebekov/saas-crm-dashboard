@@ -1,4 +1,5 @@
 const config = window.SUPABASE_CONFIG || {};
+export const oauthConfig = config.oauth || { google: false, github: false };
 
 export const supabaseEnabled = Boolean(config.url && config.anonKey && window.supabase);
 
@@ -69,6 +70,10 @@ export async function signInWithOAuth(provider) {
   if (error) {
     throw error;
   }
+}
+
+export function isOAuthEnabled(provider) {
+  return Boolean(oauthConfig[provider]);
 }
 
 async function selectAll(table) {
