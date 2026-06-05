@@ -1,0 +1,9 @@
+{
+  "name": "saas-crm-dashboard",
+  "version": "1.0.0",
+  "private": true,
+  "description": "CRM / Admin Dashboard for SaaS teams",
+  "scripts": {
+    "start": "node server.js"
+  }
+}
