@@ -1,5 +1,5 @@
 import { data as mockData } from "./data/mockData.js";
-import { fetchWorkspaceData, getSession, onAuthStateChange, signInWithOAuth, signInWithPassword, signOut, signUpWithPassword, supabaseEnabled } from "./lib/supabase.js";
+import { fetchWorkspaceData, getSession, isOAuthEnabled, onAuthStateChange, signInWithOAuth, signInWithPassword, signOut, signUpWithPassword, supabaseEnabled } from "./lib/supabase.js";
 import { store, views } from "./state.js";
 import { renderBilling, renderCustomers, renderDashboard, renderDeals, renderDrawer, renderStatusLabel, renderTasks } from "./components/views.js";
 
@@ -258,6 +258,8 @@ function renderAuthScreen(state) {
   const authHeadline = state.authMode === "signup" ? "Create your account first" : "Sign in to unlock the CRM";
   const authButton = state.authMode === "signup" ? "Create secure account" : "Sign in";
   const switchText = state.authMode === "signup" ? "Already registered? Sign in" : "New here? Create an account";
+  const googleEnabled = isOAuthEnabled("google");
+  const githubEnabled = isOAuthEnabled("github");
 
   return `
     <main class="auth-layout">
@@ -287,8 +289,8 @@ function renderAuthScreen(state) {
           <button class="ghost-button" type="button" data-toggle-auth="true">${switchText}</button>
         </form>
         <div class="oauth-grid">
-          <button class="oauth-button" type="button" data-oauth-provider="google"><span class="oauth-mark">G</span>Continue with Google</button>
-          <button class="oauth-button" type="button" data-oauth-provider="github"><span class="oauth-mark">GH</span>Continue with GitHub</button>
+          <button class="oauth-button" type="button" data-oauth-provider="google" ${googleEnabled ? "" : "disabled"}><span class="oauth-mark">G</span>Continue with Google</button>
+          <button class="oauth-button" type="button" data-oauth-provider="github" ${githubEnabled ? "" : "disabled"}><span class="oauth-mark">GH</span>Continue with GitHub</button>
         </div>
         <div class="helper-list">
           <div class="helper-note">
@@ -301,7 +303,7 @@ function renderAuthScreen(state) {
           </div>
           <div class="helper-note">
             <strong>Social login note</strong>
-            <div class="muted">Google and GitHub buttons are ready in the app. They start working once those providers are enabled in Supabase Auth.</div>
+            <div class="muted">Google and GitHub start working only after those providers are enabled in Supabase Auth. Right now: Google ${googleEnabled ? "enabled" : "disabled"}, GitHub ${githubEnabled ? "enabled" : "disabled"}.</div>
           </div>
         </div>
       </section>
@@ -426,6 +428,11 @@ document.addEventListener("click", (event) => {
   }
 
   if (target.dataset.oauthProvider) {
+    if (!isOAuthEnabled(target.dataset.oauthProvider)) {
+      flashToast(`${target.dataset.oauthProvider} login is not enabled in Supabase yet.`);
+      return;
+    }
+
     signInWithOAuth(target.dataset.oauthProvider).catch((error) => {
       flashToast(error.message);
     });
