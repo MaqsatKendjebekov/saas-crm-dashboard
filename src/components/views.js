@@ -327,7 +327,7 @@ export function renderCustomers(data, state) {
       <div class="section-header">
         <div>
           <h3>Customer Accounts</h3>
-          <p>Every record below belongs to the currently authenticated user only.</p>
+          <p>Every record below belongs to the currently authenticated user only. Click an account name to open the detail drawer.</p>
         </div>
         <div class="table-hint">${rows.length} visible account${rows.length === 1 ? "" : "s"}</div>
       </div>
@@ -388,7 +388,7 @@ export function renderDeals(data, state) {
               <div class="kanban-column__head">
                 <div>
                   <strong>${stage}</strong>
-                  <div class="muted">${stageDeals.length} deals</div>
+                  <div class="muted">${stageDeals.length} deals | drag to move, click to inspect</div>
                 </div>
                 ${renderBadge(stage)}
               </div>
@@ -437,7 +437,7 @@ export function renderTasks(data, state) {
         <div class="section-header">
           <div>
             <h3>Execution Queue</h3>
-            <p>Operational follow-through across your own workspace.</p>
+            <p>Operational follow-through across your own workspace. Open a task to review it first, then delete from the drawer if needed.</p>
           </div>
         </div>
         <div class="task-list">
@@ -509,7 +509,7 @@ export function renderBilling(data, state) {
         <div class="section-header">
           <div>
             <h3>Invoice Ledger</h3>
-            <p>Your billing section stays empty until you intentionally create invoices.</p>
+            <p>Your billing section stays empty until you intentionally create invoices. Click any invoice row to inspect or remove it.</p>
           </div>
         </div>
         <div class="invoice-list">
@@ -519,10 +519,10 @@ export function renderBilling(data, state) {
                   .map(
                     (invoice) => `
                       <div class="invoice-row">
-                        <div>
+                        <button class="invoice-row__main" data-open-drawer="invoice" data-id="${invoice.id}" type="button">
                           <strong>${safe(invoice.company)}</strong>
                           <div class="table-subtle">${safe(invoice.id)} | due ${formatDate(invoice.dueDate)}</div>
-                        </div>
+                        </button>
                         <div>${formatCurrency(invoice.amount)}</div>
                         <div>${renderBadge(invoice.status)}</div>
                       </div>
@@ -753,6 +753,25 @@ export function renderControl(data, state) {
   `;
 }
 
+function renderDrawerActions(type, entity) {
+  const label = entity.title || entity.name || entity.company || entity.id;
+
+  return `
+    <div class="drawer__actions">
+      <button class="ghost-button" data-close-drawer="true" type="button">Close</button>
+      <button
+        class="ghost-button danger-ghost-button"
+        data-request-delete="${safe(type)}"
+        data-id="${safe(entity.id)}"
+        data-name="${safe(label)}"
+        type="button"
+      >
+        Delete record
+      </button>
+    </div>
+  `;
+}
+
 export function renderDrawer(data, drawer) {
   if (!drawer) {
     return "";
@@ -835,17 +854,42 @@ export function renderDrawer(data, drawer) {
     `;
   }
 
+  if (drawer.type === "invoice") {
+    entity = data.invoices.find((item) => item.id === drawer.id);
+    if (!entity) return "";
+    content = `
+      <div class="drawer-meta">
+        <span>${safe(entity.company)}</span>
+        <span>${safe(entity.id)}</span>
+        <span>${formatDate(entity.dueDate)}</span>
+      </div>
+      <div class="drawer__section">
+        <h4>Invoice Snapshot</h4>
+        <div class="key-metrics">
+          <div class="metric-pill"><span>Status</span>${renderBadge(entity.status)}</div>
+          <div class="metric-pill"><span>Amount</span><strong>${formatCurrency(entity.amount)}</strong></div>
+          <div class="metric-pill"><span>Due date</span><strong>${formatDate(entity.dueDate)}</strong></div>
+        </div>
+      </div>
+      <div class="drawer__section">
+        <h4>Billing note</h4>
+        <p class="muted">Keep invoices here when you want the billing screen to show real collection pressure instead of placeholder guidance.</p>
+      </div>
+    `;
+  }
+
   return `
     <div class="drawer__backdrop" data-close-drawer="true"></div>
     <aside class="drawer" aria-label="Detail drawer">
       <div class="drawer__header">
         <div>
-          <h3>${safe(entity.title || entity.name)}</h3>
+          <h3>${safe(entity.title || entity.name || entity.company || entity.id)}</h3>
           <p class="muted">Detail drawer for fast context without leaving the current page.</p>
         </div>
-        <button class="ghost-button" data-close-drawer="true">Close</button>
+        <span class="drawer__eyebrow">${safe(drawer.type)}</span>
       </div>
       ${content}
+      ${renderDrawerActions(drawer.type, entity)}
     </aside>
   `;
 }
