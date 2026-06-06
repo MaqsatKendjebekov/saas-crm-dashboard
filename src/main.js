@@ -234,38 +234,34 @@ function displayProfile(session) {
   };
 }
 
-function viewDescription(activeView) {
+function viewDescription(activeView, language = "en") {
+  const isRu = language === "ru";
+
   switch (activeView) {
     case "customers":
-      return {
-        title: "Customer Orbit",
-        subtitle: "Accounts, lifecycle and ownership for this private workspace."
-      };
+      return isRu
+        ? { title: "Клиенты", subtitle: "Аккаунты, статусы и ответственные по текущему workspace." }
+        : { title: "Customers", subtitle: "Accounts, lifecycle and ownership in the current workspace." };
     case "deals":
-      return {
-        title: "Revenue Flow",
-        subtitle: "Move opportunities visually and let the pipeline tell a story."
-      };
+      return isRu
+        ? { title: "Сделки", subtitle: "Воронка, этапы и движение по активным возможностям." }
+        : { title: "Deals", subtitle: "Pipeline stages and movement across active opportunities." };
     case "tasks":
-      return {
-        title: "Execution Matrix",
-        subtitle: "Keep next actions obvious, prioritized and hard to miss."
-      };
+      return isRu
+        ? { title: "Задачи", subtitle: "Короткий фокус на текущем исполнении и приоритетах." }
+        : { title: "Tasks", subtitle: "A focused view of execution and current priorities." };
     case "billing":
-      return {
-        title: "Billing Signal",
-        subtitle: "Track what is paid, pending or overdue without leaving the cockpit."
-      };
+      return isRu
+        ? { title: "Платежи", subtitle: "Счета, оплаты и просрочки без лишнего шума." }
+        : { title: "Billing", subtitle: "Invoices, payments and overdue items without extra noise." };
     case "control":
-      return {
-        title: "Control Center",
-        subtitle: "Create the first real records here and the rest of the product wakes up."
-      };
+      return isRu
+        ? { title: "Control Center", subtitle: "Здесь создаются записи и обновляется рабочее пространство." }
+        : { title: "Control Center", subtitle: "Create records and update the workspace here." };
     default:
-      return {
-        title: "Pulse Command",
-        subtitle: "A private CRM workspace with guided onboarding and a more cinematic flow."
-      };
+      return isRu
+        ? { title: "Dashboard", subtitle: "Краткий обзор по текущему приватному workspace." }
+        : { title: "Dashboard", subtitle: "A compact overview of the current private workspace." };
   }
 }
 
@@ -282,6 +278,30 @@ function filterOptions(activeView) {
     default:
       return [];
   }
+}
+
+function localizeFilterValue(language, value) {
+  const labels = {
+    ru: {
+      All: "Все",
+      Customer: "Клиент",
+      Qualified: "Квалифицирован",
+      New: "Новый",
+      Churned: "Потерян",
+      Discovery: "Изучение",
+      Proposal: "Предложение",
+      Negotiation: "Переговоры",
+      Open: "Открыта",
+      "In Progress": "В работе",
+      Blocked: "Заблокирована",
+      Done: "Готово",
+      Paid: "Оплачен",
+      Pending: "Ожидает",
+      Overdue: "Просрочен"
+    }
+  };
+
+  return labels[language]?.[value] || value;
 }
 
 function renderWorkspaceNav(state) {
@@ -309,37 +329,20 @@ function renderWorkspaceNav(state) {
 }
 
 function renderContextRail(state) {
-  const data = currentWorkspace();
-  const totalRecords = data.customers.length + data.deals.length + data.tasks.length + data.invoices.length;
-  const modeLabel = state.activeView === "control" ? t(state, "createMode") : t(state, "browseMode");
-  const helperText =
-    state.activeView === "control"
-      ? "Create data here. Inspect and remove records from the detail drawer in the main sections."
-      : "Browse from the top menu. Click a record to open its drawer, then manage or delete it there.";
-
-  return `
-    <div class="context-rail">
-      <div class="context-pill context-pill--accent">
-        <span>${escape(modeLabel)}</span>
-        <strong>${escape(viewDescription(state.activeView).title)}</strong>
-      </div>
-      <div class="context-pill">
-        <span>${escape(t(state, "recordsLabel"))}</span>
-        <strong>${totalRecords}</strong>
-      </div>
-      <div class="context-pill context-pill--wide">
-        <span>Flow</span>
-        <strong>${escape(helperText)}</strong>
-      </div>
-    </div>
-  `;
+  return "";
 }
 
 function renderSidebar(state) {
   const data = currentWorkspace();
   const totalRecords = data.customers.length + data.deals.length + data.tasks.length + data.invoices.length;
+  const sectionCount = [
+    [t(state, "customers"), data.customers.length],
+    [t(state, "deals"), data.deals.length],
+    [t(state, "tasks"), data.tasks.length],
+    [t(state, "billing"), data.invoices.length]
+  ];
 
-  return `
+  return     `
     <aside class="sidebar">
       <div class="brand">
         <img class="brand__mark" src="./assets/pulse-logo.svg" alt="Pulse CRM logo" />
@@ -348,19 +351,23 @@ function renderSidebar(state) {
           <p>${escape(t(state, "appTagline"))}</p>
         </div>
       </div>
-      <div class="workspace-switcher">
-        <strong>${escape(t(state, "guidedWorkspace"))}</strong>
-        <div class="sidebar-copy">${escape(t(state, "guidedWorkspaceBody"))}</div>
-      </div>
-      <div class="sidebar-footer">
-        <div class="sidebar-card">
-          <strong>${escape(t(state, "quickOrientation"))}</strong>
-          <div class="sidebar-copy">${escape(t(state, "quickOrientationBody"))}</div>
-        </div>
-        <div class="sidebar-card">
+      <div class="sidebar-footer sidebar-footer--minimal">
+        <div class="sidebar-card sidebar-card--status">
           <strong>${escape(t(state, "workspaceStatus"))}</strong>
           <div class="sidebar-copy">${renderStatusLabel(state)}</div>
           <div class="sidebar-copy sidebar-copy--strong">${totalRecords} ${escape(t(state, "totalRecords"))}</div>
+          <div class="sidebar-metrics">
+            ${sectionCount
+              .map(
+                ([label, count]) => `
+                  <div class="sidebar-metric">
+                    <span>${escape(label)}</span>
+                    <strong>${count}</strong>
+                  </div>
+                `
+              )
+              .join("")}
+          </div>
         </div>
       </div>
     </aside>
@@ -369,6 +376,7 @@ function renderSidebar(state) {
 
 function renderProfileMenu(state) {
   const profile = displayProfile(state.session);
+  const caretLabel = state.language === "ru" ? (state.profileMenuOpen ? "Скрыть" : "Меню") : state.profileMenuOpen ? "Hide" : "Menu";
 
   return `
     <div class="profile-area" data-profile-area="true">
@@ -382,7 +390,7 @@ function renderProfileMenu(state) {
           <strong>${escape(profile.name)}</strong>
           <span>${escape(profile.email)}</span>
         </span>
-        <span class="profile-caret">${state.profileMenuOpen ? "Hide" : "Menu"}</span>
+        <span class="profile-caret">${caretLabel}</span>
       </button>
       ${
         state.profileMenuOpen
@@ -411,27 +419,28 @@ function renderProfileMenu(state) {
 }
 
 function renderTopbar(state) {
-  const copy = viewDescription(state.activeView);
+  const copy = viewDescription(state.activeView, state.language);
   const options = filterOptions(state.activeView);
   const activeFilter = state.filters[state.activeView];
   const isControlView = state.activeView === "control";
+  const filterHint = state.language === "ru" ? "В Control Center фильтры не нужны." : "No filters in Control Center.";
 
-  return `
+  return     `
     <header class="topbar topbar--stacked">
-      <div class="topbar-row">
-      <div class="topbar-copy">
-        <span class="label">${escape(isControlView ? t(state, "editLabel") : t(state, "browseLabel"))}</span>
-        <h2 class="page-title">${escape(copy.title)}</h2>
-        <p class="page-subtitle">${escape(copy.subtitle)}</p>
+      <div class="topbar-row topbar-row--minimal">
+        <div class="topbar-copy">
+          <span class="label">${escape(isControlView ? t(state, "editLabel") : t(state, "browseLabel"))}</span>
+          <h2 class="page-title">${escape(copy.title)}</h2>
+          <p class="page-subtitle">${escape(copy.subtitle)}</p>
+        </div>
+        <div class="topbar-action-group topbar-action-group--single">
+          <div class="status-chip"><span class="status-dot ${state.backend === "live" ? "is-live" : "is-demo"}"></span>${renderStatusLabel(state)}</div>
+          <button class="icon-button" data-theme-toggle="true" type="button">${escape(state.theme === "dark" ? t(state, "lightMode") : t(state, "darkMode"))}</button>
+          <button class="primary-button ${isControlView ? "is-active" : ""}" data-open-control="true" type="button">${escape(isControlView ? t(state, "editingWorkspace") : t(state, "createData"))}</button>
+          ${renderProfileMenu(state)}
+        </div>
       </div>
-      <div class="topbar-actions">
-        <div class="status-chip"><span class="status-dot ${state.backend === "live" ? "is-live" : "is-demo"}"></span>${renderStatusLabel(state)}</div>
-        <button class="icon-button" data-theme-toggle="true" type="button">${escape(state.theme === "dark" ? t(state, "lightMode") : t(state, "darkMode"))}</button>
-        <button class="primary-button ${isControlView ? "is-active" : ""}" data-open-control="true" type="button">${escape(isControlView ? t(state, "editingWorkspace") : t(state, "createData"))}</button>
-        ${renderProfileMenu(state)}
-      </div>
-      </div>
-      <div class="toolbar-surface">
+      <div class="toolbar-surface toolbar-surface--minimal">
         <div class="toolbar-surface__main">
           ${renderWorkspaceNav(state)}
         </div>
@@ -444,15 +453,14 @@ function renderTopbar(state) {
               ? `
                 <select class="filter-select" data-filter-view="${state.activeView}">
                   ${options
-                    .map((option) => `<option value="${escape(option)}" ${option === activeFilter ? "selected" : ""}>${escape(option)}</option>`)
+                    .map((option) => `<option value="${escape(option)}" ${option === activeFilter ? "selected" : ""}>${escape(localizeFilterValue(state.language, option))}</option>`)
                     .join("")}
                 </select>
               `
-              : `<div class="filter-placeholder">${escape(t(state, "openDashboardHint"))}</div>`
+              : `<div class="filter-placeholder">${escape(filterHint)}</div>`
           }
         </div>
       </div>
-      ${renderContextRail(state)}
     </header>
   `;
 }
@@ -462,12 +470,14 @@ function renderLoadingOverlay(state) {
     return "";
   }
 
-  return `
+  const isRu = state.language === "ru";
+
+  return     `
     <div class="loading-overlay" aria-live="polite" aria-busy="true">
       <div class="loading-card">
         <img class="loading-logo" src="./assets/pulse-logo.svg" alt="Pulse CRM logo" />
-        <h3>${state.booting ? "Preparing secure workspace" : "Syncing your records"}</h3>
-        <p class="muted">${state.booting ? "Checking your session and opening the correct screen." : "Applying live changes from your private Supabase workspace."}</p>
+        <h3>${state.booting ? (isRu ? "Открываем рабочее пространство" : "Preparing workspace") : isRu ? "Обновляем записи" : "Syncing records"}</h3>
+        <p class="muted">${state.booting ? (isRu ? "Проверяем сессию и загружаем нужный экран." : "Checking your session and opening the right screen.") : isRu ? "Подтягиваем изменения из приватного Supabase workspace." : "Applying live changes from your private Supabase workspace."}</p>
         <div class="loading-bar" aria-hidden="true"><div class="loading-bar__fill"></div></div>
       </div>
     </div>
@@ -483,10 +493,12 @@ function renderConfirmDialog(state) {
     return "";
   }
 
-  return `
+  const isRu = state.language === "ru";
+
+  return     `
     <div class="confirm-overlay" data-confirm-backdrop="true">
       <div class="confirm-card" role="dialog" aria-modal="true" aria-label="${escape(state.confirmDialog.title)}">
-        <span class="label">Confirm action</span>
+        <span class="label">${isRu ? "Подтверждение" : "Confirm action"}</span>
         <h3>${escape(state.confirmDialog.title)}</h3>
         <p class="muted">${escape(state.confirmDialog.message)}</p>
         <div class="confirm-actions">
@@ -504,9 +516,29 @@ function renderAuthScreen(state) {
   const switchText = state.authMode === "signup" ? t(state, "authSwitchSignin") : t(state, "authSwitchSignup");
   const googleEnabled = isOAuthEnabled("google");
   const githubEnabled = isOAuthEnabled("github");
-  const disabledMessage = !supabaseEnabled ? "Supabase is not configured yet, so registration is temporarily unavailable." : "";
+  const isRu = state.language === "ru";
+  const disabledMessage = !supabaseEnabled ? (isRu ? "Supabase пока не настроен, поэтому регистрация временно недоступна." : "Supabase is not configured yet, so registration is temporarily unavailable.") : "";
+  const authCopy = isRu
+    ? {
+        email: "Рабочая почта",
+        password: "Пароль",
+        repeatPassword: "Повтори пароль",
+        google: "Продолжить через Google",
+        github: "Продолжить через GitHub",
+        configTitle: "Статус настройки",
+        menuMapBody: "Dashboard = обзор, Customers = клиенты, Deals = воронка, Tasks = задачи, Billing = счета, Control Center = создание записей."
+      }
+    : {
+        email: "Work email",
+        password: "Password",
+        repeatPassword: "Repeat password",
+        google: "Continue with Google",
+        github: "Continue with GitHub",
+        configTitle: "Configuration notice",
+        menuMapBody: "Dashboard = overview, Customers = accounts, Deals = pipeline, Tasks = execution, Billing = invoices, Control Center = create data."
+      };
 
-  return `
+  return     `
     <main class="auth-layout">
       <section class="auth-panel">
         <div class="auth-brand">
@@ -520,23 +552,23 @@ function renderAuthScreen(state) {
         <h2 class="auth-title">${escape(authHeadline)}</h2>
         <p class="auth-copy">${escape(t(state, "authIntro"))}</p>
         <form class="auth-form auth-form--page" data-auth-form="true">
-          <input type="email" name="email" placeholder="Work email" autocomplete="email" required ${supabaseEnabled ? "" : "disabled"} />
-          <input type="password" name="password" placeholder="Password" autocomplete="${state.authMode === "signup" ? "new-password" : "current-password"}" required minlength="8" ${supabaseEnabled ? "" : "disabled"} />
+          <input type="email" name="email" placeholder="${escape(authCopy.email)}" autocomplete="email" required ${supabaseEnabled ? "" : "disabled"} />
+          <input type="password" name="password" placeholder="${escape(authCopy.password)}" autocomplete="${state.authMode === "signup" ? "new-password" : "current-password"}" required minlength="8" ${supabaseEnabled ? "" : "disabled"} />
           ${
             state.authMode === "signup"
-              ? `<input type="password" name="confirmPassword" placeholder="Repeat password" autocomplete="new-password" required minlength="8" ${supabaseEnabled ? "" : "disabled"} />`
+              ? `<input type="password" name="confirmPassword" placeholder="${escape(authCopy.repeatPassword)}" autocomplete="new-password" required minlength="8" ${supabaseEnabled ? "" : "disabled"} />`
               : ""
           }
           <button class="primary-button" type="submit" ${supabaseEnabled ? "" : "disabled"}>${escape(authButton)}</button>
           <button class="ghost-button" type="button" data-toggle-auth="true">${escape(switchText)}</button>
         </form>
         <div class="oauth-grid">
-          <button class="oauth-button" type="button" data-oauth-provider="google" ${googleEnabled && supabaseEnabled ? "" : "disabled"}><span class="oauth-mark">G</span>Continue with Google</button>
-          <button class="oauth-button" type="button" data-oauth-provider="github" ${githubEnabled && supabaseEnabled ? "" : "disabled"}><span class="oauth-mark">GH</span>Continue with GitHub</button>
+          <button class="oauth-button" type="button" data-oauth-provider="google" ${googleEnabled && supabaseEnabled ? "" : "disabled"}><span class="oauth-mark">G</span>${escape(authCopy.google)}</button>
+          <button class="oauth-button" type="button" data-oauth-provider="github" ${githubEnabled && supabaseEnabled ? "" : "disabled"}><span class="oauth-mark">GH</span>${escape(authCopy.github)}</button>
         </div>
         ${
           disabledMessage
-            ? `<div class="helper-note helper-note--warning"><strong>Configuration notice</strong><div class="muted">${escape(disabledMessage)}</div></div>`
+            ? `<div class="helper-note helper-note--warning"><strong>${escape(authCopy.configTitle)}</strong><div class="muted">${escape(disabledMessage)}</div></div>`
             : ""
         }
         <div class="helper-list">
@@ -557,7 +589,7 @@ function renderAuthScreen(state) {
       <aside class="auth-side">
         <div class="sidebar-card feature-card">
           <strong>${escape(t(state, "menuMap"))}</strong>
-          <div class="sidebar-copy">Dashboard = overview, Customers = accounts, Deals = pipeline, Tasks = execution, Billing = invoices, Control Center = create data.</div>
+          <div class="sidebar-copy">${escape(authCopy.menuMapBody)}</div>
         </div>
         <div class="sidebar-card feature-card">
           <strong>${escape(t(state, "firstRun"))}</strong>
@@ -603,7 +635,7 @@ function renderApp(state) {
         <div class="footer-note">${escape(t(state, "footer"))}</div>
       </main>
     </div>
-    ${renderDrawer(data, state.drawer)}
+    ${renderDrawer(data, state.drawer, state.language)}
     ${renderConfirmDialog(state)}
     ${renderLoadingOverlay(state)}
     ${renderToast(state)}
@@ -717,6 +749,15 @@ function tableForRecordType(type) {
     default:
       return `${type}s`;
   }
+}
+
+function resetPage(view) {
+  store.setState((state) => ({
+    pages: {
+      ...state.pages,
+      [view]: 1
+    }
+  }));
 }
 
 function requestDeleteRecord(recordType, recordId, recordName) {
@@ -885,7 +926,7 @@ document.addEventListener("click", (event) => {
   }
 
   const target = clickTarget.closest(
-    "[data-nav], [data-open-drawer], [data-close-drawer], [data-theme-toggle], [data-open-control], [data-profile-toggle], [data-request-signout], [data-request-delete], [data-toggle-auth], [data-sync-data], [data-oauth-provider], [data-create-type], [data-confirm-action], [data-confirm-dismiss], [data-confirm-backdrop], [data-language-switch]"
+    "[data-nav], [data-open-drawer], [data-close-drawer], [data-theme-toggle], [data-open-control], [data-profile-toggle], [data-request-signout], [data-request-delete], [data-toggle-auth], [data-sync-data], [data-oauth-provider], [data-create-type], [data-confirm-action], [data-confirm-dismiss], [data-confirm-backdrop], [data-language-switch], [data-page-dir]"
   );
 
   if (!target) {
@@ -897,7 +938,11 @@ document.addEventListener("click", (event) => {
       activeView: target.dataset.nav,
       globalSearch: "",
       drawer: null,
-      profileMenuOpen: false
+      profileMenuOpen: false,
+      pages: {
+        ...store.state.pages,
+        [target.dataset.nav]: 1
+      }
     });
     return;
   }
@@ -1008,6 +1053,22 @@ document.addEventListener("click", (event) => {
 
   if (target.dataset.createType) {
     store.setState({ createType: target.dataset.createType });
+    return;
+  }
+
+  if (target.dataset.pageDir) {
+    const view = target.dataset.pageView;
+    if (!view) {
+      return;
+    }
+
+    const delta = target.dataset.pageDir === "next" ? 1 : -1;
+    store.setState((state) => ({
+      pages: {
+        ...state.pages,
+        [view]: Math.max(1, (state.pages[view] || 1) + delta)
+      }
+    }));
   }
 });
 
@@ -1015,7 +1076,13 @@ document.addEventListener("input", (event) => {
   const target = event.target;
 
   if (target.matches("[data-search-input='true']")) {
-    store.setState({ globalSearch: target.value });
+    store.setState((state) => ({
+      globalSearch: target.value,
+      pages: {
+        ...state.pages,
+        [state.activeView]: 1
+      }
+    }));
   }
 });
 
@@ -1028,6 +1095,10 @@ document.addEventListener("change", (event) => {
       filters: {
         ...state.filters,
         [view]: target.value
+      },
+      pages: {
+        ...state.pages,
+        [view]: 1
       }
     }));
   }
@@ -1055,7 +1126,7 @@ document.addEventListener("submit", async (event) => {
       }
 
       if (password !== confirmPassword) {
-        flashToast("Passwords do not match.");
+        flashToast(store.state.language === "ru" ? "Пароли не совпадают." : "Passwords do not match.");
         return;
       }
     }
@@ -1140,7 +1211,7 @@ document.addEventListener("drop", async (event) => {
     await updateDealStage(dealId, targetStage);
     await logActivity(`Moved deal "${deal.title}" to ${targetStage}.`);
     await hydrateWorkspace();
-    flashToast(`Deal moved to ${targetStage}.`);
+    flashToast(store.state.language === "ru" ? `Сделка перемещена: ${localizeFilterValue("ru", targetStage)}.` : `Deal moved to ${targetStage}.`);
   } catch (error) {
     await hydrateWorkspace();
     flashToast(error.message);
