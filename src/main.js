@@ -1,4 +1,5 @@
 import {
+  deleteRecord,
   fetchWorkspaceData,
   getSession,
   insertRecord,
@@ -95,7 +96,15 @@ const copy = {
     themeToast: "Theme switched to",
     signedOut: "Signed out successfully.",
     signInFirst: "Sign in first.",
-    authConfigMissing: "Supabase is not configured yet."
+    authConfigMissing: "Supabase is not configured yet.",
+    browseMode: "Browse mode",
+    createMode: "Create mode",
+    recordsLabel: "Records",
+    deleteAction: "Delete record",
+    deleteRecordTitle: "Delete this record?",
+    deleteRecordMessage: "This action permanently removes the selected item from your workspace.",
+    deleteRecordConfirm: "Delete now",
+    deleteSuccess: "Record deleted successfully."
   },
   ru: {
     appTagline: "Приватное SaaS-пространство",
@@ -299,6 +308,33 @@ function renderWorkspaceNav(state) {
   `;
 }
 
+function renderContextRail(state) {
+  const data = currentWorkspace();
+  const totalRecords = data.customers.length + data.deals.length + data.tasks.length + data.invoices.length;
+  const modeLabel = state.activeView === "control" ? t(state, "createMode") : t(state, "browseMode");
+  const helperText =
+    state.activeView === "control"
+      ? "Create data here. Inspect and remove records from the detail drawer in the main sections."
+      : "Browse from the top menu. Click a record to open its drawer, then manage or delete it there.";
+
+  return `
+    <div class="context-rail">
+      <div class="context-pill context-pill--accent">
+        <span>${escape(modeLabel)}</span>
+        <strong>${escape(viewDescription(state.activeView).title)}</strong>
+      </div>
+      <div class="context-pill">
+        <span>${escape(t(state, "recordsLabel"))}</span>
+        <strong>${totalRecords}</strong>
+      </div>
+      <div class="context-pill context-pill--wide">
+        <span>Flow</span>
+        <strong>${escape(helperText)}</strong>
+      </div>
+    </div>
+  `;
+}
+
 function renderSidebar(state) {
   const data = currentWorkspace();
   const totalRecords = data.customers.length + data.deals.length + data.tasks.length + data.invoices.length;
@@ -416,6 +452,7 @@ function renderTopbar(state) {
           }
         </div>
       </div>
+      ${renderContextRail(state)}
     </header>
   `;
 }
@@ -673,6 +710,30 @@ function viewForCreateType(type) {
   }
 }
 
+function tableForRecordType(type) {
+  switch (type) {
+    case "invoice":
+      return "invoices";
+    default:
+      return `${type}s`;
+  }
+}
+
+function requestDeleteRecord(recordType, recordId, recordName) {
+  store.setState({
+    confirmDialog: {
+      action: "delete-record",
+      confirmLabel: t(store.state, "deleteRecordConfirm"),
+      message: `${t(store.state, "deleteRecordMessage")} ${recordName ? `Target: ${recordName}.` : ""}`.trim(),
+      title: t(store.state, "deleteRecordTitle"),
+      recordType,
+      recordId,
+      recordName
+    },
+    profileMenuOpen: false
+  });
+}
+
 function buildPayload(type, form, session) {
   const userId = session.user.id;
   const today = new Date().toISOString().slice(0, 10);
@@ -789,6 +850,26 @@ async function confirmSignOut() {
   }
 }
 
+async function confirmDeleteRecord() {
+  const dialog = store.state.confirmDialog;
+
+  if (!dialog?.recordType || !dialog?.recordId || !store.state.session) {
+    store.setState({ confirmDialog: null });
+    return;
+  }
+
+  try {
+    store.setState({ loading: true, confirmDialog: null, drawer: null, profileMenuOpen: false });
+    await deleteRecord(tableForRecordType(dialog.recordType), dialog.recordId);
+    await logActivity(`Deleted ${dialog.recordType} "${dialog.recordName || dialog.recordId}".`);
+    await hydrateWorkspace();
+    flashToast(t(store.state, "deleteSuccess"));
+  } catch (error) {
+    store.setState({ loading: false, booting: false });
+    flashToast(error.message);
+  }
+}
+
 store.subscribe(renderRoot);
 renderRoot(store.state);
 
@@ -804,7 +885,7 @@ document.addEventListener("click", (event) => {
   }
 
   const target = clickTarget.closest(
-    "[data-nav], [data-open-drawer], [data-close-drawer], [data-theme-toggle], [data-open-control], [data-profile-toggle], [data-request-signout], [data-toggle-auth], [data-sync-data], [data-oauth-provider], [data-create-type], [data-confirm-action], [data-confirm-dismiss], [data-confirm-backdrop], [data-language-switch]"
+    "[data-nav], [data-open-drawer], [data-close-drawer], [data-theme-toggle], [data-open-control], [data-profile-toggle], [data-request-signout], [data-request-delete], [data-toggle-auth], [data-sync-data], [data-oauth-provider], [data-create-type], [data-confirm-action], [data-confirm-dismiss], [data-confirm-backdrop], [data-language-switch]"
   );
 
   if (!target) {
@@ -881,6 +962,11 @@ document.addEventListener("click", (event) => {
     return;
   }
 
+  if (target.dataset.requestDelete) {
+    requestDeleteRecord(target.dataset.requestDelete, target.dataset.id, target.dataset.name);
+    return;
+  }
+
   if (target.dataset.confirmDismiss || target.dataset.confirmBackdrop) {
     store.setState({ confirmDialog: null });
     return;
@@ -888,6 +974,11 @@ document.addEventListener("click", (event) => {
 
   if (target.dataset.confirmAction === "signout") {
     confirmSignOut();
+    return;
+  }
+
+  if (target.dataset.confirmAction === "delete-record") {
+    confirmDeleteRecord();
     return;
   }
 
