@@ -19,6 +19,41 @@ function ensureClient() {
   }
 }
 
+function getProjectRef() {
+  if (!config.url) {
+    return "";
+  }
+
+  const match = config.url.match(/^https:\/\/([^.]+)\.supabase\.co/i);
+  return match ? match[1] : "";
+}
+
+function clearAuthStorage() {
+  const projectRef = getProjectRef();
+  const matchers = [
+    "supabase.auth.token",
+    "sb-",
+    projectRef ? `sb-${projectRef}` : ""
+  ].filter(Boolean);
+
+  [window.localStorage, window.sessionStorage].forEach((storage) => {
+    const keysToRemove = [];
+
+    for (let index = 0; index < storage.length; index += 1) {
+      const key = storage.key(index);
+      if (!key) {
+        continue;
+      }
+
+      if (matchers.some((matcher) => key.startsWith(matcher) || key.includes(matcher))) {
+        keysToRemove.push(key);
+      }
+    }
+
+    keysToRemove.forEach((key) => storage.removeItem(key));
+  });
+}
+
 export async function getSession() {
   if (!supabaseClient) {
     return null;
@@ -62,9 +97,37 @@ export async function signUpWithPassword(email, password) {
 
 export async function signOut() {
   ensureClient();
-  const { error } = await supabaseClient.auth.signOut({ scope: "local" });
-  if (error) {
-    throw error;
+  let lastError = null;
+
+  try {
+    const { error } = await supabaseClient.auth.signOut({ scope: "global" });
+    if (error) {
+      lastError = error;
+    }
+  } catch (error) {
+    lastError = error;
+  }
+
+  if (lastError) {
+    try {
+      const { error } = await supabaseClient.auth.signOut({ scope: "local" });
+      if (error) {
+        lastError = error;
+      } else {
+        lastError = null;
+      }
+    } catch (error) {
+      lastError = error;
+    }
+  }
+
+  clearAuthStorage();
+
+  if (lastError) {
+    const session = await getSession().catch(() => null);
+    if (session) {
+      throw lastError;
+    }
   }
 }
 
