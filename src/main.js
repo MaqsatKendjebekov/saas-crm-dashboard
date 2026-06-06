@@ -791,11 +791,17 @@ store.subscribe(renderRoot);
 renderRoot(store.state);
 
 document.addEventListener("click", (event) => {
-  if (store.state.profileMenuOpen && !event.target.closest("[data-profile-area='true']")) {
+  const clickTarget = event.target instanceof Element ? event.target : event.target?.parentElement;
+
+  if (!clickTarget) {
+    return;
+  }
+
+  if (store.state.profileMenuOpen && !clickTarget.closest("[data-profile-area='true']")) {
     store.setState({ profileMenuOpen: false });
   }
 
-  const target = event.target.closest(
+  const target = clickTarget.closest(
     "[data-nav], [data-open-drawer], [data-close-drawer], [data-theme-toggle], [data-open-control], [data-profile-toggle], [data-request-signout], [data-toggle-auth], [data-sync-data], [data-oauth-provider], [data-create-type], [data-confirm-action], [data-confirm-dismiss], [data-confirm-backdrop], [data-language-switch]"
   );
 
