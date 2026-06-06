@@ -18,6 +18,12 @@ export const store = {
       tasks: "All",
       billing: "All"
     },
+    pages: {
+      customers: 1,
+      deals: 1,
+      tasks: 1,
+      billing: 1
+    },
     drawer: null,
     theme: "dark",
     toast: null,
