@@ -256,11 +256,11 @@ function viewDescription(activeView, language = "en") {
         : { title: "Billing", subtitle: "Invoices, payments and overdue items without extra noise." };
     case "control":
       return isRu
-        ? { title: "Control Center", subtitle: "Здесь создаются записи и обновляется рабочее пространство." }
+        ? { title: "Центр управления", subtitle: "Здесь создаются записи и обновляется рабочее пространство." }
         : { title: "Control Center", subtitle: "Create records and update the workspace here." };
     default:
       return isRu
-        ? { title: "Dashboard", subtitle: "Краткий обзор по текущему приватному workspace." }
+        ? { title: "Дашборд", subtitle: "Краткий обзор текущего приватного пространства." }
         : { title: "Dashboard", subtitle: "A compact overview of the current private workspace." };
   }
 }
