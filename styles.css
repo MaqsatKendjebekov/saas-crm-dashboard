@@ -364,6 +364,9 @@ body[data-theme="light"] .sidebar {
 .topbar--stacked {
   display: grid;
   gap: 18px;
+  position: sticky;
+  top: 14px;
+  z-index: 8;
 }
 
 .topbar-row {
@@ -421,6 +424,45 @@ body[data-theme="light"] .sidebar {
   backdrop-filter: blur(16px);
 }
 
+.context-rail {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.context-pill {
+  padding: 14px 16px;
+  border-radius: 22px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.04);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+  display: grid;
+  gap: 6px;
+  transition: transform 180ms ease, border-color 180ms ease, background 180ms ease;
+}
+
+.context-pill span {
+  color: var(--muted);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-weight: 700;
+}
+
+.context-pill strong {
+  font-size: 0.96rem;
+  line-height: 1.45;
+}
+
+.context-pill--accent {
+  background: linear-gradient(135deg, rgba(121, 247, 212, 0.12), rgba(109, 184, 255, 0.08));
+  border-color: rgba(121, 247, 212, 0.18);
+}
+
+.context-pill--wide strong {
+  font-weight: 500;
+}
+
 .toolbar-surface__main,
 .toolbar-surface__actions {
   display: flex;
@@ -456,6 +498,18 @@ body[data-theme="light"] .sidebar {
   border-color: rgba(121, 247, 212, 0.24);
   background: linear-gradient(135deg, rgba(121, 247, 212, 0.14), rgba(109, 184, 255, 0.08));
   box-shadow: 0 14px 26px rgba(0, 0, 0, 0.18);
+}
+
+.nav-pill:focus-visible,
+.profile-trigger:focus-visible,
+.primary-button:focus-visible,
+.ghost-button:focus-visible,
+.icon-button:focus-visible,
+.type-pill:focus-visible,
+.profile-dropdown__action:focus-visible,
+.oauth-button:focus-visible {
+  outline: 0;
+  box-shadow: 0 0 0 3px rgba(121, 247, 212, 0.16), 0 14px 26px rgba(0, 0, 0, 0.18);
 }
 
 .filter-placeholder {
@@ -869,6 +923,12 @@ body[data-theme="light"] .sidebar {
   border-color: var(--line-strong);
 }
 
+.context-pill:hover,
+.toolbar-surface:hover {
+  transform: translateY(-2px);
+  border-color: var(--line-strong);
+}
+
 .metric-change {
   display: inline-flex;
   margin-top: 14px;
@@ -992,6 +1052,20 @@ body[data-theme="light"] .sidebar {
   gap: 14px;
   padding: 15px 0;
   border-bottom: 1px solid var(--line);
+}
+
+.table-row,
+.task-row,
+.invoice-row {
+  transition: transform 180ms ease, border-color 180ms ease, background 180ms ease;
+}
+
+.table-row:hover,
+.task-row:hover,
+.invoice-row:hover {
+  transform: translateX(4px);
+  background: linear-gradient(90deg, rgba(121, 247, 212, 0.05), transparent 85%);
+  border-bottom-color: rgba(121, 247, 212, 0.18);
 }
 
 .activity-item:last-child,
@@ -1156,6 +1230,14 @@ body[data-theme="light"] .sidebar {
   align-items: center;
 }
 
+.invoice-row__main {
+  background: transparent;
+  border: 0;
+  padding: 0;
+  color: inherit;
+  text-align: left;
+}
+
 .drawer__backdrop,
 .confirm-overlay,
 .loading-overlay {
@@ -1186,6 +1268,39 @@ body[data-theme="light"] .sidebar {
   margin-top: 18px;
   padding-top: 18px;
   border-top: 1px solid var(--line);
+}
+
+.drawer__eyebrow {
+  padding: 8px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(121, 247, 212, 0.18);
+  background: rgba(121, 247, 212, 0.08);
+  color: var(--accent);
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+
+.drawer__actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid var(--line);
+  flex-wrap: wrap;
+}
+
+.danger-ghost-button {
+  color: var(--danger);
+  border-color: rgba(255, 95, 138, 0.2);
+  background: rgba(255, 95, 138, 0.08);
+}
+
+.danger-ghost-button:hover {
+  border-color: rgba(255, 95, 138, 0.34);
+  box-shadow: 0 16px 28px rgba(255, 95, 138, 0.12);
 }
 
 .metric-pill {
@@ -1344,6 +1459,19 @@ body[data-theme="light"] .sidebar {
 
 .view-stack > * {
   animation: riseIn 280ms ease;
+}
+
+.view-stack {
+  position: relative;
+}
+
+.view-stack::before {
+  content: "";
+  position: absolute;
+  inset: -8px 0 auto;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(121, 247, 212, 0.26), transparent);
+  pointer-events: none;
 }
 
 .confirm-overlay,
@@ -1524,7 +1652,8 @@ body[data-theme="light"] .toast {
   .task-grid,
   .billing-breakdown,
   .hero-banner,
-  .auth-layout {
+  .auth-layout,
+  .context-rail {
     grid-template-columns: 1fr;
   }
 
@@ -1554,6 +1683,10 @@ body[data-theme="light"] .toast {
   .topbar-row,
   .toolbar-surface {
     flex-direction: column;
+  }
+
+  .topbar--stacked {
+    top: 0;
   }
 
   .topbar-actions,
