@@ -1,6 +1,7 @@
 import { badgeTone, escapeHtml, formatCompact, formatCurrency, formatDate, initials } from "../utils/format.js";
 
 const dealStages = ["Discovery", "Qualified", "Proposal", "Negotiation"];
+const PAGE_SIZE = 6;
 function getCopy(language = "en") {
   if (language === "ru") {
     return {
@@ -35,8 +36,311 @@ function getCopy(language = "en") {
 
 const safe = escapeHtml;
 
-function renderBadge(value) {
-  return `<span class="badge badge--${badgeTone(value)}">${safe(value)}</span>`;
+function getUiCopy(language = "en") {
+  const base = getCopy(language);
+  if (language === "ru") {
+    return {
+      ...base,
+      noMovement: "Пока без движения",
+      addFirstRecords: "Добавь первые записи, и график начнет заполняться.",
+      currentVolume: "Текущий объем",
+      workspaceTrend: "Тренд",
+      source: "Источник",
+      live: "Онлайн",
+      commandLayer: "Рабочая зона",
+      dashboardTitleEmpty: "Чистое приватное CRM-пространство.",
+      dashboardTitleLive: "Спокойный обзор по текущему workspace.",
+      dashboardBodyEmpty: "Начни с клиента или сделки, а дальше разделы сами станут понятнее.",
+      dashboardBodyLive: "Все записи принадлежат только текущему аккаунту и загружаются из защищенного Supabase workspace.",
+      pipelineValue: "Сумма воронки",
+      customerRecords: "Клиентские записи",
+      overdueInvoices: "Просроченные счета",
+      noRecordsYet: "Записей пока нет",
+      addDataLocation: "Где добавить данные",
+      dashboardStartsClean: "Старт без общих тестовых строк.",
+      openControlCenterShort: "Открой Control Center и создай первую запись.",
+      customerArr: "ARR клиентов",
+      privateWorkspaceData: "Приватные данные",
+      weightedPipeline: "Взвешенная воронка",
+      liveDeals: "По текущим сделкам",
+      openExecutionTasks: "Открытые задачи",
+      accountsNeedAttention: "аккаунтов требуют внимания",
+      noRiskyAccounts: "Рисковых аккаунтов нет",
+      invoicesTracked: "Счетов в системе",
+      noOverdueInvoices: "Нет просроченных счетов",
+      growthSignal: "Динамика",
+      growthSignalBody: "Короткий обзор по текущим данным.",
+      recentActivity: "Последняя активность",
+      recentActivityBody: "Последние действия в аккаунте.",
+      activityEmpty: "История появится после первых действий.",
+      accountsTracked: "Всего аккаунтов",
+      payingAccounts: "Платящие аккаунты",
+      qualifiedLeads: "Квалифицированные лиды",
+      atRiskHealth: "Риск по health",
+      customerAccounts: "Клиентские аккаунты",
+      customerAccountsBody: "Нажми на запись, чтобы открыть карточку справа.",
+      account: "Аккаунт",
+      status: "Статус",
+      owner: "Ответственный",
+      plan: "План",
+      arr: "ARR",
+      health: "Health",
+      noCustomerRecords: "Пока нет клиентов.",
+      visibleAccounts: "аккаунтов видно",
+      openPipeline: "Открытая воронка",
+      enterpriseMotions: "Enterprise сделки",
+      negotiations: "Переговоры",
+      avgWinProbability: "Средний шанс",
+      dragHint: "перетащи для смены этапа",
+      noDealsInStage: "Пока нет сделок на этапе",
+      executionQueue: "Очередь задач",
+      executionQueueBody: "Открой задачу для деталей или удаления.",
+      noTasksYet: "Пока нет задач.",
+      workloadSnapshot: "Срез нагрузки",
+      workloadSnapshotBody: "Приоритеты помогают быстро понять фокус.",
+      laneMix: "Распределение",
+      laneMixBody: "Сколько задач в каждой полосе.",
+      collected: "Собрано",
+      pendingOverdue: "Pending + overdue",
+      invoicesLedger: "Реестр счетов",
+      invoicesLedgerBody: "Открой счет для деталей или удаления.",
+      noInvoicesYet: "Пока нет счетов.",
+      billingGuidance: "Статусы счетов",
+      paidNote: "Оплачено",
+      pendingNote: "Ожидает оплаты",
+      overdueNote: "Просрочено",
+      createDeal: "Создать сделку",
+      createTask: "Создать задачу",
+      createInvoice: "Создать счет",
+      createCustomer: "Создать клиента",
+      workspaceStart: "Создай запись здесь и возвращайся в разделы.",
+      workspaceReady: "В этом пространстве уже есть рабочие данные.",
+      customersShort: "Клиенты",
+      dealsShort: "Сделки",
+      tasksShort: "Задачи",
+      invoicesShort: "Счета",
+      close: "Закрыть",
+      deleteRecord: "Удалить запись",
+      noNotesYet: "Пока без заметок.",
+      accountSnapshot: "Срез аккаунта",
+      notes: "Заметки",
+      dealSnapshot: "Срез сделки",
+      taskSnapshot: "Срез задачи",
+      invoiceSnapshot: "Срез счета",
+      dueDate: "Срок",
+      value: "Сумма",
+      priority: "Приоритет",
+      amount: "Сумма",
+      page: "Страница",
+      prev: "Назад",
+      next: "Вперед",
+      valueLabels: {
+        All: "Все",
+        Customer: "Клиент",
+        Qualified: "Квалифицирован",
+        New: "Новый",
+        Churned: "Потерян",
+        Discovery: "Изучение",
+        Proposal: "Предложение",
+        Negotiation: "Переговоры",
+        Open: "Открыта",
+        "In Progress": "В работе",
+        Blocked: "Заблокирована",
+        Done: "Готово",
+        Paid: "Оплачен",
+        Pending: "Ожидает",
+        Overdue: "Просрочен",
+        Warm: "Теплый",
+        Strong: "Сильный",
+        Watch: "Наблюдать",
+        Critical: "Критично",
+        High: "Высокий",
+        Medium: "Средний",
+        Low: "Низкий",
+        Today: "Сегодня",
+        "This Week": "На неделе",
+        Completed: "Завершено",
+        "New Biz": "Новый бизнес",
+        Expansion: "Расширение",
+        Renewal: "Продление"
+      }
+    };
+  }
+
+  return {
+    ...base,
+    noMovement: "No movement yet",
+    addFirstRecords: "Add the first records and this trend will wake up.",
+    currentVolume: "Current volume",
+    workspaceTrend: "Trend",
+    source: "Source",
+    live: "Live",
+    commandLayer: "Workspace",
+    dashboardTitleEmpty: "A clean private CRM workspace.",
+    dashboardTitleLive: "A quieter overview of your current workspace.",
+    dashboardBodyEmpty: "Start with a customer or deal, then the rest of the sections become useful immediately.",
+    dashboardBodyLive: "All records belong to the current account and load from your protected Supabase workspace.",
+    pipelineValue: "Pipeline value",
+    customerRecords: "Customer records",
+    overdueInvoices: "Overdue invoices",
+    noRecordsYet: "No records yet",
+    addDataLocation: "Where to add data",
+    dashboardStartsClean: "This dashboard starts clean with no shared demo rows.",
+    openControlCenterShort: "Open Control Center and create the first real record.",
+    customerArr: "Customer ARR",
+    privateWorkspaceData: "Private workspace data",
+    weightedPipeline: "Weighted pipeline",
+    liveDeals: "Based on active deals",
+    openExecutionTasks: "Open tasks",
+    accountsNeedAttention: "accounts need attention",
+    noRiskyAccounts: "No risky accounts",
+    invoicesTracked: "Invoices tracked",
+    noOverdueInvoices: "No overdue invoices",
+    growthSignal: "Growth signal",
+    growthSignalBody: "A compact view of current movement.",
+    recentActivity: "Recent activity",
+    recentActivityBody: "Latest actions inside this account.",
+    activityEmpty: "Activity will appear after your first actions.",
+    accountsTracked: "Accounts tracked",
+    payingAccounts: "Paying accounts",
+    qualifiedLeads: "Qualified leads",
+    atRiskHealth: "At-risk health",
+    customerAccounts: "Customer accounts",
+    customerAccountsBody: "Open a record to inspect it in the drawer.",
+    account: "Account",
+    status: "Status",
+    owner: "Owner",
+    plan: "Plan",
+    arr: "ARR",
+    health: "Health",
+    noCustomerRecords: "No customer records yet.",
+    visibleAccounts: "visible accounts",
+    openPipeline: "Open pipeline",
+    enterpriseMotions: "Enterprise motions",
+    negotiations: "Negotiations",
+    avgWinProbability: "Avg probability",
+    dragHint: "drag to move",
+    noDealsInStage: "No deals in stage",
+    executionQueue: "Execution queue",
+    executionQueueBody: "Open any task for details or deletion.",
+    noTasksYet: "No tasks yet.",
+    workloadSnapshot: "Workload",
+    workloadSnapshotBody: "Use priorities to keep focus obvious.",
+    laneMix: "Lane mix",
+    laneMixBody: "How tasks are distributed right now.",
+    collected: "Collected",
+    pendingOverdue: "Pending + overdue",
+    invoicesLedger: "Invoice ledger",
+    invoicesLedgerBody: "Open an invoice to inspect or remove it.",
+    noInvoicesYet: "No invoices yet.",
+    billingGuidance: "Invoice states",
+    paidNote: "Paid",
+    pendingNote: "Pending",
+    overdueNote: "Overdue",
+    createDeal: "Create deal",
+    createTask: "Create task",
+    createInvoice: "Create invoice",
+    createCustomer: "Create customer",
+    workspaceStart: "Create a record here, then continue in the main sections.",
+    workspaceReady: "You already have live records in this workspace.",
+    customersShort: "Customers",
+    dealsShort: "Deals",
+    tasksShort: "Tasks",
+    invoicesShort: "Invoices",
+    close: "Close",
+    deleteRecord: "Delete record",
+    noNotesYet: "No notes yet.",
+    accountSnapshot: "Account snapshot",
+    notes: "Notes",
+    dealSnapshot: "Deal snapshot",
+    taskSnapshot: "Task snapshot",
+    invoiceSnapshot: "Invoice snapshot",
+    dueDate: "Due date",
+    value: "Value",
+    priority: "Priority",
+    amount: "Amount",
+    page: "Page",
+    prev: "Prev",
+    next: "Next",
+    valueLabels: {}
+  };
+}
+
+function getViewCopy(language = "en") {
+  const copy = getUiCopy(language);
+
+  if (language === "ru") {
+    return {
+      ...copy,
+      contactsShort: "конт.",
+      likelyShort: "вероятность",
+      dueInline: "срок",
+      stageLabel: "Этап",
+      probabilityLabel: "Вероятность",
+      ofTotal: "из",
+      recordTypeLabels: {
+        customer: "клиент",
+        deal: "сделка",
+        task: "задача",
+        invoice: "счет"
+      }
+    };
+  }
+
+  return {
+    ...copy,
+    contactsShort: "contacts",
+    likelyShort: "likely",
+    dueInline: "due",
+    stageLabel: "Stage",
+    probabilityLabel: "Probability",
+    ofTotal: "of",
+    recordTypeLabels: {
+      customer: "customer",
+      deal: "deal",
+      task: "task",
+      invoice: "invoice"
+    }
+  };
+}
+
+function translateValue(copy, value) {
+  return copy.valueLabels?.[value] || value;
+}
+
+function renderBadge(value, copy = getViewCopy("en")) {
+  return `<span class="badge badge--${badgeTone(value)}">${safe(translateValue(copy, value))}</span>`;
+}
+
+function paginate(rows, state, view) {
+  const currentPage = state.pages?.[view] || 1;
+  const totalPages = Math.max(1, Math.ceil(rows.length / PAGE_SIZE));
+  const safePage = Math.min(currentPage, totalPages);
+  const start = (safePage - 1) * PAGE_SIZE;
+  const end = Math.min(rows.length, start + PAGE_SIZE);
+
+  return {
+    pageRows: rows.slice(start, start + PAGE_SIZE),
+    currentPage: safePage,
+    totalPages,
+    totalRows: rows.length,
+    startIndex: rows.length ? start + 1 : 0,
+    endIndex: end
+  };
+}
+
+function renderPagination(view, pageInfo, copy) {
+  if (pageInfo.totalPages <= 1) {
+    return "";
+  }
+
+  return `
+    <div class="pagination">
+      <button class="ghost-button pagination__button" data-page-dir="prev" data-page-view="${view}" type="button" ${pageInfo.currentPage === 1 ? "disabled" : ""}>${safe(copy.prev)}</button>
+      <span class="pagination__label">${pageInfo.startIndex}-${pageInfo.endIndex} ${safe(copy.ofTotal)} ${pageInfo.totalRows}</span>
+      <button class="ghost-button pagination__button" data-page-dir="next" data-page-view="${view}" type="button" ${pageInfo.currentPage === pageInfo.totalPages ? "disabled" : ""}>${safe(copy.next)}</button>
+    </div>
+  `;
 }
 
 function renderField(label, input, hint = "") {
@@ -49,12 +353,12 @@ function renderField(label, input, hint = "") {
   `;
 }
 
-function renderChart(values) {
+function renderChart(values, copy) {
   if (!values.length || values.every((value) => value === 0)) {
     return `
       <div class="empty-chart">
-        <strong>No movement yet</strong>
-        <div class="muted">Add your first records from Control Center and this trend panel will come alive.</div>
+        <strong>${safe(copy.noMovement)}</strong>
+        <div class="muted">${safe(copy.addFirstRecords)}</div>
       </div>
     `;
   }
@@ -93,7 +397,7 @@ function renderChart(values) {
 
   return `
     <div class="chart">
-      <svg viewBox="0 0 ${width} ${height}" role="img" aria-label="Workspace growth trend">
+      <svg viewBox="0 0 ${width} ${height}" role="img" aria-label="${safe(copy.workspaceTrend)}">
         <defs>
           <linearGradient id="revenueGradient" x1="0%" y1="0%" x2="100%" y2="0%">
             <stop offset="0%" stop-color="#7ef2cf"></stop>
@@ -110,9 +414,9 @@ function renderChart(values) {
         <g class="chart-points">${circles}</g>
       </svg>
       <div class="chart-footer">
-        <div><span class="mini-label">Current volume</span><strong>${formatCompact(values.at(-1) * 1000)}</strong></div>
-        <div><span class="mini-label">Workspace trend</span><strong>Live</strong></div>
-        <div><span class="mini-label">Source</span><strong>Supabase</strong></div>
+        <div><span class="mini-label">${safe(copy.currentVolume)}</span><strong>${formatCompact(values.at(-1) * 1000)}</strong></div>
+        <div><span class="mini-label">${safe(copy.workspaceTrend)}</span><strong>${safe(copy.live)}</strong></div>
+        <div><span class="mini-label">${safe(copy.source)}</span><strong>Supabase</strong></div>
       </div>
     </div>
   `;
@@ -172,52 +476,40 @@ function isWorkspaceEmpty(data) {
   return !data.customers.length && !data.deals.length && !data.tasks.length && !data.invoices.length;
 }
 
-function renderDashboardHero(metrics, empty) {
+function renderDashboardHero(metrics, empty, copy) {
   return `
     <section class="hero-banner">
       <div>
-        <span class="label">Command layer</span>
-        <h2>${empty ? "Build your workspace from zero with a guided control center." : "Operate your whole pipeline from a cinematic SaaS cockpit."}</h2>
-        <p>
-          ${empty
-            ? "There are no shared demo rows anymore. This workspace belongs to the signed-in user only. Start by creating your first customer or deal in Control Center."
-            : "Your records are private to this account, routed through Supabase Auth and row-level policies, and surfaced through one focused interface."}
-        </p>
-        <div class="guide-grid">
-          <div class="guide-card"><strong>Step 1</strong><span>Open Control Center</span><p>Create the first customer, task or invoice from one place.</p></div>
-          <div class="guide-card"><strong>Step 2</strong><span>Use the menu</span><p>Customers, Deals, Tasks and Billing mirror how a real workspace is organized.</p></div>
-          <div class="guide-card"><strong>Step 3</strong><span>Use the profile corner</span><p>Session controls and logout confirmation now live in the top-right profile area.</p></div>
-        </div>
+        <span class="label">${safe(copy.commandLayer)}</span>
+        <h2>${safe(empty ? copy.dashboardTitleEmpty : copy.dashboardTitleLive)}</h2>
+        <p>${safe(empty ? copy.dashboardBodyEmpty : copy.dashboardBodyLive)}</p>
       </div>
       <div class="hero-stats">
-        <div class="hero-stat"><span class="label">Pipeline value</span><strong>${formatCurrency(metrics.totalPipeline)}</strong></div>
-        <div class="hero-stat"><span class="label">Customer records</span><strong>${metrics.activeCustomers}</strong></div>
-        <div class="hero-stat"><span class="label">Overdue invoices</span><strong>${metrics.overdue}</strong></div>
+        <div class="hero-stat"><span class="label">${safe(copy.pipelineValue)}</span><strong>${formatCurrency(metrics.totalPipeline)}</strong></div>
+        <div class="hero-stat"><span class="label">${safe(copy.customerRecords)}</span><strong>${metrics.activeCustomers}</strong></div>
+        <div class="hero-stat"><span class="label">${safe(copy.overdueInvoices)}</span><strong>${metrics.overdue}</strong></div>
       </div>
     </section>
   `;
 }
 
-function renderEmptyWorkspace() {
+function renderEmptyWorkspace(copy) {
   return `
     <section class="empty-workspace">
       <article class="empty-workspace__card">
-        <strong>No records yet</strong>
-        <p>Your dashboard starts intentionally clean. No seeded CRM rows are shown to new users anymore.</p>
+        <strong>${safe(copy.noRecordsYet)}</strong>
+        <p>${safe(copy.dashboardStartsClean)}</p>
       </article>
       <article class="empty-workspace__card">
-        <strong>Where to add data</strong>
-        <p>Open <span class="inline-accent">Control Center</span> from the menu and create your first customer, deal, task or invoice.</p>
-      </article>
-      <article class="empty-workspace__card">
-        <strong>What disappears later</strong>
-        <p>This onboarding panel is only a guide. As soon as you add real data, the dashboard switches into the full operational mode automatically.</p>
+        <strong>${safe(copy.addDataLocation)}</strong>
+        <p>${safe(copy.openControlCenterShort)}</p>
       </article>
     </section>
   `;
 }
 
-export function renderDashboard(data) {
+export function renderDashboard(data, state) {
+  const copy = getViewCopy(state.language);
   const metrics = getMetrics(data);
   const empty = isWorkspaceEmpty(data);
   const openTasks = data.tasks.filter((task) => task.status !== "Done").length;
@@ -225,49 +517,49 @@ export function renderDashboard(data) {
   const trendValues = data.deals.length ? data.deals.map((deal, index) => Math.max(12, deal.value / 1000 + index * 2)).slice(0, 7) : [];
 
   return `
-    ${renderDashboardHero(metrics, empty)}
+    ${renderDashboardHero(metrics, empty, copy)}
     ${
       empty
-        ? renderEmptyWorkspace()
+        ? renderEmptyWorkspace(copy)
         : `
           <section class="metrics-grid">
             <article class="metric-card">
-              <span class="metric-label">Customer ARR</span>
+              <span class="metric-label">${safe(copy.customerArr)}</span>
               <div class="metric-value">${formatCurrency(metrics.totalArr)}</div>
-              <span class="metric-change">Private workspace data</span>
+              <span class="metric-change">${safe(copy.privateWorkspaceData)}</span>
             </article>
             <article class="metric-card">
-              <span class="metric-label">Weighted pipeline</span>
+              <span class="metric-label">${safe(copy.weightedPipeline)}</span>
               <div class="metric-value">${formatCurrency(metrics.totalPipeline)}</div>
-              <span class="metric-change">Live from your deals</span>
+              <span class="metric-change">${safe(copy.liveDeals)}</span>
             </article>
             <article class="metric-card">
-              <span class="metric-label">Open execution tasks</span>
+              <span class="metric-label">${safe(copy.openExecutionTasks)}</span>
               <div class="metric-value">${openTasks}</div>
-              <span class="metric-change ${atRisk ? "is-negative" : ""}">${atRisk ? `${atRisk} accounts need attention` : "No risky accounts flagged"}</span>
+              <span class="metric-change ${atRisk ? "is-negative" : ""}">${atRisk ? `${atRisk} ${safe(copy.accountsNeedAttention)}` : safe(copy.noRiskyAccounts)}</span>
             </article>
             <article class="metric-card">
-              <span class="metric-label">Invoices tracked</span>
+              <span class="metric-label">${safe(copy.invoicesTracked)}</span>
               <div class="metric-value">${data.invoices.length}</div>
-              <span class="metric-change">${metrics.overdue ? `${metrics.overdue} overdue` : "No overdue invoices"}</span>
+              <span class="metric-change">${metrics.overdue ? `${metrics.overdue}` : safe(copy.noOverdueInvoices)}</span>
             </article>
           </section>
           <section class="content-grid">
             <article class="panel">
               <div class="panel__header">
                 <div>
-                  <h3>Growth Signal</h3>
-                  <p>This panel starts empty and grows only from records created by the current user.</p>
+                  <h3>${safe(copy.growthSignal)}</h3>
+                  <p>${safe(copy.growthSignalBody)}</p>
                 </div>
-                ${renderBadge("Live")}
+                ${renderBadge("Live", copy)}
               </div>
-              ${renderChart(trendValues)}
+              ${renderChart(trendValues, copy)}
             </article>
             <article class="activity-card">
               <div class="section-header">
                 <div>
-                  <h3>Recent Activity</h3>
-                  <p>Latest actions inside this secure workspace.</p>
+                  <h3>${safe(copy.recentActivity)}</h3>
+                  <p>${safe(copy.recentActivityBody)}</p>
                 </div>
               </div>
               <div class="activity-feed">
@@ -287,7 +579,7 @@ export function renderDashboard(data) {
                         `
                         )
                         .join("")
-                    : `<div class="empty-state">Activity feed will appear here once you begin creating or updating records.</div>`
+                    : `<div class="empty-state">${safe(copy.activityEmpty)}</div>`
                 }
               </div>
             </article>
@@ -298,47 +590,50 @@ export function renderDashboard(data) {
 }
 
 export function renderStatusLabel(state) {
+  const isRu = state.language === "ru";
   if (state.loading) {
-    return "Syncing workspace";
+    return isRu ? "Синхронизация" : "Syncing workspace";
   }
 
   if (state.backend === "live") {
-    return state.session?.user?.email ? `Supabase live | ${safe(state.session.user.email)}` : "Supabase live";
+    return state.session?.user?.email ? `${isRu ? "Supabase онлайн" : "Supabase live"} | ${safe(state.session.user.email)}` : isRu ? "Supabase онлайн" : "Supabase live";
   }
 
   if (state.configured) {
-    return "Supabase ready | idle";
+    return isRu ? "Supabase готов" : "Supabase ready";
   }
 
-  return "Demo mode";
+  return isRu ? "Демо режим" : "Demo mode";
 }
 
 export function renderCustomers(data, state) {
-  const rows = filterCustomers(data, state);
+  const copy = getViewCopy(state.language);
+  const pageInfo = paginate(filterCustomers(data, state), state, "customers");
+  const rows = pageInfo.pageRows;
 
   return `
     <section class="summary-grid">
-      <article class="summary-card"><span class="summary-label">Accounts tracked</span><div class="summary-value">${data.customers.length}</div></article>
-      <article class="summary-card"><span class="summary-label">Paying accounts</span><div class="summary-value">${data.customers.filter((item) => item.status === "Customer").length}</div></article>
-      <article class="summary-card"><span class="summary-label">Qualified leads</span><div class="summary-value">${data.customers.filter((item) => item.status === "Qualified").length}</div></article>
-      <article class="summary-card"><span class="summary-label">At-risk health</span><div class="summary-value">${data.customers.filter((item) => ["Watch", "Critical"].includes(item.health)).length}</div></article>
+      <article class="summary-card"><span class="summary-label">${safe(copy.accountsTracked)}</span><div class="summary-value">${data.customers.length}</div></article>
+      <article class="summary-card"><span class="summary-label">${safe(copy.payingAccounts)}</span><div class="summary-value">${data.customers.filter((item) => item.status === "Customer").length}</div></article>
+      <article class="summary-card"><span class="summary-label">${safe(copy.qualifiedLeads)}</span><div class="summary-value">${data.customers.filter((item) => item.status === "Qualified").length}</div></article>
+      <article class="summary-card"><span class="summary-label">${safe(copy.atRiskHealth)}</span><div class="summary-value">${data.customers.filter((item) => ["Watch", "Critical"].includes(item.health)).length}</div></article>
     </section>
     <section class="table-card">
       <div class="section-header">
         <div>
-          <h3>Customer Accounts</h3>
-          <p>Every record below belongs to the currently authenticated user only. Click an account name to open the detail drawer.</p>
+          <h3>${safe(copy.customerAccounts)}</h3>
+          <p>${safe(copy.customerAccountsBody)}</p>
         </div>
-        <div class="table-hint">${rows.length} visible account${rows.length === 1 ? "" : "s"}</div>
+        <div class="table-hint">${filterCustomers(data, state).length} ${safe(copy.visibleAccounts)}</div>
       </div>
       <div class="data-table">
         <div class="table-head">
-          <div>Account</div>
-          <div>Status</div>
-          <div>Owner</div>
-          <div>Plan</div>
-          <div>ARR</div>
-          <div>Health</div>
+          <div>${safe(copy.account)}</div>
+          <div>${safe(copy.status)}</div>
+          <div>${safe(copy.owner)}</div>
+          <div>${safe(copy.plan)}</div>
+          <div>${safe(copy.arr)}</div>
+          <div>${safe(copy.health)}</div>
         </div>
         ${
           rows.length
@@ -350,34 +645,38 @@ export function renderCustomers(data, state) {
                       <div class="avatar">${safe(initials(customer.name))}</div>
                       <button data-open-drawer="customer" data-id="${customer.id}">
                         <strong>${safe(customer.name)}</strong>
-                        <div class="table-subtle">${safe(customer.region)} | ${customer.contacts} contacts</div>
+                        <div class="table-subtle">${safe(customer.region)} | ${customer.contacts} ${safe(copy.contactsShort)}</div>
                       </button>
                     </div>
-                    <div>${renderBadge(customer.status)}</div>
+                    <div>${renderBadge(customer.status, copy)}</div>
                     <div>${safe(customer.owner)}</div>
                     <div>${safe(customer.plan)}</div>
                     <div>${formatCurrency(customer.arr)}</div>
-                    <div>${renderBadge(customer.health)}</div>
+                    <div>${renderBadge(customer.health, copy)}</div>
                   </div>
                 `
                 )
                 .join("")
-            : `<div class="empty-state">No customer records yet. Open Control Center and create your first account.</div>`
+            : `<div class="empty-state">${safe(copy.noCustomerRecords)}</div>`
         }
       </div>
+      ${renderPagination("customers", pageInfo, copy)}
     </section>
   `;
 }
 
 export function renderDeals(data, state) {
-  const deals = filterDeals(data, state);
+  const copy = getViewCopy(state.language);
+  const filteredDeals = filterDeals(data, state);
+  const pageInfo = paginate(filteredDeals, state, "deals");
+  const deals = pageInfo.pageRows;
 
   return `
     <section class="summary-grid">
-      <article class="summary-card"><span class="summary-label">Open pipeline</span><div class="summary-value">${formatCompact(deals.reduce((sum, deal) => sum + deal.value, 0))}</div></article>
-      <article class="summary-card"><span class="summary-label">Enterprise motions</span><div class="summary-value">${deals.filter((deal) => deal.type === "Enterprise").length}</div></article>
-      <article class="summary-card"><span class="summary-label">Negotiations</span><div class="summary-value">${deals.filter((deal) => deal.stage === "Negotiation").length}</div></article>
-      <article class="summary-card"><span class="summary-label">Avg win probability</span><div class="summary-value">${deals.length ? Math.round(deals.reduce((sum, deal) => sum + deal.probability, 0) / deals.length) : 0}%</div></article>
+      <article class="summary-card"><span class="summary-label">${safe(copy.openPipeline)}</span><div class="summary-value">${formatCompact(filteredDeals.reduce((sum, deal) => sum + deal.value, 0))}</div></article>
+      <article class="summary-card"><span class="summary-label">${safe(copy.enterpriseMotions)}</span><div class="summary-value">${filteredDeals.filter((deal) => deal.type === "Enterprise").length}</div></article>
+      <article class="summary-card"><span class="summary-label">${safe(copy.negotiations)}</span><div class="summary-value">${filteredDeals.filter((deal) => deal.stage === "Negotiation").length}</div></article>
+      <article class="summary-card"><span class="summary-label">${safe(copy.avgWinProbability)}</span><div class="summary-value">${filteredDeals.length ? Math.round(filteredDeals.reduce((sum, deal) => sum + deal.probability, 0) / filteredDeals.length) : 0}%</div></article>
     </section>
     <section class="kanban-grid">
       ${dealStages
@@ -387,10 +686,10 @@ export function renderDeals(data, state) {
             <article class="kanban-column" data-stage="${stage}">
               <div class="kanban-column__head">
                 <div>
-                  <strong>${stage}</strong>
-                  <div class="muted">${stageDeals.length} deals | drag to move, click to inspect</div>
+                  <strong>${safe(translateValue(copy, stage))}</strong>
+                  <div class="muted">${stageDeals.length} | ${safe(copy.dragHint)}</div>
                 </div>
-                ${renderBadge(stage)}
+                ${renderBadge(stage, copy)}
               </div>
               <div class="kanban-list" data-drop-zone="${stage}">
                 ${
@@ -409,7 +708,7 @@ export function renderDeals(data, state) {
                               </div>
                               <div class="deal-card__meta" style="margin-top:12px;">
                                 <span>${formatCurrency(deal.value)}</span>
-                                <span>${deal.probability}% likely</span>
+                                <span>${deal.probability}% ${safe(copy.likelyShort)}</span>
                                 <span>${formatDate(deal.dueDate)}</span>
                               </div>
                             </button>
@@ -417,7 +716,7 @@ export function renderDeals(data, state) {
                         `
                         )
                         .join("")
-                    : `<div class="empty-state">No deals in ${stage.toLowerCase()} yet.</div>`
+                    : `<div class="empty-state">${safe(copy.noDealsInStage)}: ${safe(translateValue(copy, stage).toLowerCase())}</div>`
                 }
               </div>
             </article>
@@ -425,19 +724,22 @@ export function renderDeals(data, state) {
         })
         .join("")}
     </section>
+    ${renderPagination("deals", pageInfo, copy)}
   `;
 }
 
 export function renderTasks(data, state) {
-  const tasks = filterTasks(data, state);
+  const copy = getViewCopy(state.language);
+  const pageInfo = paginate(filterTasks(data, state), state, "tasks");
+  const tasks = pageInfo.pageRows;
 
   return `
     <section class="task-grid">
       <article class="table-card">
         <div class="section-header">
           <div>
-            <h3>Execution Queue</h3>
-            <p>Operational follow-through across your own workspace. Open a task to review it first, then delete from the drawer if needed.</p>
+            <h3>${safe(copy.executionQueue)}</h3>
+            <p>${safe(copy.executionQueueBody)}</p>
           </div>
         </div>
         <div class="task-list">
@@ -456,33 +758,34 @@ export function renderTasks(data, state) {
                             <span>${formatDate(task.dueDate)}</span>
                           </div>
                         </button>
-                        <div>${renderBadge(task.status)}</div>
+                        <div>${renderBadge(task.status, copy)}</div>
                       </div>
                     `
                   )
                   .join("")
-              : `<div class="empty-state">No tasks yet. Add a first task in Control Center to build your workflow.</div>`
+              : `<div class="empty-state">${safe(copy.noTasksYet)}</div>`
           }
         </div>
+        ${renderPagination("tasks", pageInfo, copy)}
       </article>
       <div class="section-stack">
         <article class="summary-card">
-          <span class="summary-label">Workload snapshot</span>
+          <span class="summary-label">${safe(copy.workloadSnapshot)}</span>
           <div class="summary-value">${tasks.filter((task) => task.status !== "Done").length}</div>
-          <p class="muted">Use priorities to decide what should move first.</p>
+          <p class="muted">${safe(copy.workloadSnapshotBody)}</p>
         </article>
         <article class="activity-card">
           <div class="section-header">
             <div>
-              <h3>Lane Mix</h3>
-              <p>Shows whether your week is front-loaded or already completed.</p>
+              <h3>${safe(copy.laneMix)}</h3>
+              <p>${safe(copy.laneMixBody)}</p>
             </div>
           </div>
           <div class="key-metrics">
             ${["Today", "This Week", "Completed"]
               .map((lane) => {
                 const count = tasks.filter((task) => task.lane === lane).length;
-                return `<div class="metric-pill"><span>${safe(lane)}</span><strong>${count}</strong></div>`;
+                return `<div class="metric-pill"><span>${safe(translateValue(copy, lane))}</span><strong>${count}</strong></div>`;
               })
               .join("")}
           </div>
@@ -493,23 +796,26 @@ export function renderTasks(data, state) {
 }
 
 export function renderBilling(data, state) {
-  const invoices = filterInvoices(data, state);
-  const paidTotal = invoices.filter((invoice) => invoice.status === "Paid").reduce((sum, invoice) => sum + invoice.amount, 0);
-  const pendingTotal = invoices.filter((invoice) => invoice.status !== "Paid").reduce((sum, invoice) => sum + invoice.amount, 0);
+  const copy = getViewCopy(state.language);
+  const filteredInvoices = filterInvoices(data, state);
+  const pageInfo = paginate(filteredInvoices, state, "billing");
+  const invoices = pageInfo.pageRows;
+  const paidTotal = filteredInvoices.filter((invoice) => invoice.status === "Paid").reduce((sum, invoice) => sum + invoice.amount, 0);
+  const pendingTotal = filteredInvoices.filter((invoice) => invoice.status !== "Paid").reduce((sum, invoice) => sum + invoice.amount, 0);
 
   return `
     <section class="billing-grid">
-      <article class="billing-card"><span class="summary-label">Collected</span><div class="summary-value">${formatCurrency(paidTotal)}</div></article>
-      <article class="billing-card"><span class="summary-label">Pending + overdue</span><div class="summary-value">${formatCurrency(pendingTotal)}</div></article>
-      <article class="billing-card"><span class="summary-label">Overdue invoices</span><div class="summary-value">${invoices.filter((invoice) => invoice.status === "Overdue").length}</div></article>
-      <article class="billing-card"><span class="summary-label">Invoices tracked</span><div class="summary-value">${invoices.length}</div></article>
+      <article class="billing-card"><span class="summary-label">${safe(copy.collected)}</span><div class="summary-value">${formatCurrency(paidTotal)}</div></article>
+      <article class="billing-card"><span class="summary-label">${safe(copy.pendingOverdue)}</span><div class="summary-value">${formatCurrency(pendingTotal)}</div></article>
+      <article class="billing-card"><span class="summary-label">${safe(copy.overdueInvoices)}</span><div class="summary-value">${filteredInvoices.filter((invoice) => invoice.status === "Overdue").length}</div></article>
+      <article class="billing-card"><span class="summary-label">${safe(copy.invoicesTracked)}</span><div class="summary-value">${filteredInvoices.length}</div></article>
     </section>
     <section class="billing-breakdown">
       <article class="table-card">
         <div class="section-header">
           <div>
-            <h3>Invoice Ledger</h3>
-            <p>Your billing section stays empty until you intentionally create invoices. Click any invoice row to inspect or remove it.</p>
+            <h3>${safe(copy.invoicesLedger)}</h3>
+            <p>${safe(copy.invoicesLedgerBody)}</p>
           </div>
         </div>
         <div class="invoice-list">
@@ -521,29 +827,30 @@ export function renderBilling(data, state) {
                       <div class="invoice-row">
                         <button class="invoice-row__main" data-open-drawer="invoice" data-id="${invoice.id}" type="button">
                           <strong>${safe(invoice.company)}</strong>
-                          <div class="table-subtle">${safe(invoice.id)} | due ${formatDate(invoice.dueDate)}</div>
+                          <div class="table-subtle">${safe(invoice.id)} | ${safe(copy.dueInline)} ${formatDate(invoice.dueDate)}</div>
                         </button>
                         <div>${formatCurrency(invoice.amount)}</div>
-                        <div>${renderBadge(invoice.status)}</div>
+                        <div>${renderBadge(invoice.status, copy)}</div>
                       </div>
                     `
                   )
                   .join("")
-              : `<div class="empty-state">No invoices yet. Create one from Control Center when you want to model a billing flow.</div>`
+              : `<div class="empty-state">${safe(copy.noInvoicesYet)}</div>`
           }
         </div>
+        ${renderPagination("billing", pageInfo, copy)}
       </article>
       <article class="activity-card">
         <div class="section-header">
           <div>
-            <h3>Billing Guidance</h3>
-            <p>Simple hints so the product feels self-explanatory even on the first session.</p>
+            <h3>${safe(copy.billingGuidance)}</h3>
+            <p>${safe(copy.invoicesLedgerBody)}</p>
           </div>
         </div>
         <div class="helper-list">
-          <div class="helper-note"><strong>Paid</strong><div class="muted">Use for settled invoices you want to keep in history.</div></div>
-          <div class="helper-note"><strong>Pending</strong><div class="muted">Use for invoices that are sent but not yet collected.</div></div>
-          <div class="helper-note"><strong>Overdue</strong><div class="muted">Use when you want the dashboard to surface risk more aggressively.</div></div>
+          <div class="helper-note"><strong>${safe(copy.paidNote)}</strong></div>
+          <div class="helper-note"><strong>${safe(copy.pendingNote)}</strong></div>
+          <div class="helper-note"><strong>${safe(copy.overdueNote)}</strong></div>
         </div>
       </article>
     </section>
@@ -551,142 +858,252 @@ export function renderBilling(data, state) {
 }
 
 function renderCreateForm(state) {
+  const copy = getViewCopy(state.language);
+  const isRu = state.language === "ru";
+  const formCopy = isRu
+    ? {
+        company: "Компания",
+        companyHint: "К какому аккаунту относится запись.",
+        companyPlaceholder: "Northstar Labs",
+        dealTitle: "Название сделки",
+        dealTitleHint: "Короткое понятное имя возможности.",
+        dealTitlePlaceholder: "Expansion package",
+        owner: "Ответственный",
+        ownerHint: "Кто ведет эту запись.",
+        ownerPlaceholder: "Elena Torres",
+        value: "Сумма",
+        valueHint: "Ожидаемая сумма в USD.",
+        stage: "Этап",
+        stageHint: "Текущее место сделки в воронке.",
+        dueDate: "Срок",
+        dueDateHint: "Когда нужно вернуться к этой записи.",
+        probability: "Вероятность",
+        probabilityHint: "Оценка шанса от 0 до 100.",
+        dealType: "Тип сделки",
+        dealTypeHint: "Помогает отделять новые продажи от продлений и расширений.",
+        taskTitle: "Название задачи",
+        taskTitleHint: "Лучше всего работает короткая формулировка действия.",
+        taskTitlePlaceholder: "Подготовить предложение к звонку",
+        relatedCustomer: "Клиент",
+        relatedCustomerHint: "С каким аккаунтом связана задача.",
+        assignee: "Исполнитель",
+        assigneeHint: "Кто отвечает за выполнение.",
+        assigneePlaceholder: "Jade Carter",
+        priority: "Приоритет",
+        priorityHint: "Определяет срочность.",
+        status: "Статус",
+        statusHint: "Текущее состояние записи.",
+        lane: "Полоса",
+        laneHint: "Где задача будет показана в рабочем срезе.",
+        amount: "Сумма",
+        amountHint: "Сумма счета в USD.",
+        invoiceStatusHint: "Как этот счет должен отображаться в биллинге.",
+        customerName: "Имя клиента",
+        customerNameHint: "Название, которое видно в карточках и таблицах.",
+        plan: "Тариф",
+        planHint: "На каком пакете находится клиент.",
+        customerStatusHint: "Где клиент находится в жизненном цикле.",
+        arrHint: "Годовая регулярная выручка в USD.",
+        health: "Состояние",
+        healthHint: "Насколько устойчивы отношения с клиентом.",
+        contacts: "Контакты",
+        contactsHint: "Сколько людей привязано к аккаунту.",
+        region: "Регион",
+        regionHint: "Помогает фильтровать клиентскую базу.",
+        notes: "Заметки",
+        notesHint: "Короткий контекст, который удобно увидеть позже.",
+        notesPlaceholder: "Короткая заметка о клиенте"
+      }
+    : {
+        company: "Company",
+        companyHint: "Which account this record belongs to.",
+        companyPlaceholder: "Northstar Labs",
+        dealTitle: "Deal title",
+        dealTitleHint: "Short readable name for the opportunity.",
+        dealTitlePlaceholder: "Expansion package",
+        owner: "Owner",
+        ownerHint: "Who leads this record.",
+        ownerPlaceholder: "Elena Torres",
+        value: "Value",
+        valueHint: "Expected amount in USD.",
+        stage: "Stage",
+        stageHint: "Current place in the pipeline.",
+        dueDate: "Due date",
+        dueDateHint: "When this record should move next.",
+        probability: "Probability",
+        probabilityHint: "Confidence level from 0 to 100.",
+        dealType: "Deal type",
+        dealTypeHint: "Separates new sales from renewals and expansions.",
+        taskTitle: "Task title",
+        taskTitleHint: "Short action-oriented wording works best here.",
+        taskTitlePlaceholder: "Review proposal before call",
+        relatedCustomer: "Customer",
+        relatedCustomerHint: "Which account this task relates to.",
+        assignee: "Assignee",
+        assigneeHint: "Who owns the action item.",
+        assigneePlaceholder: "Jade Carter",
+        priority: "Priority",
+        priorityHint: "Controls urgency.",
+        status: "Status",
+        statusHint: "Current state of the record.",
+        lane: "Lane",
+        laneHint: "Where the task appears in the workload view.",
+        amount: "Amount",
+        amountHint: "Invoice amount in USD.",
+        invoiceStatusHint: "How finance should read this invoice.",
+        customerName: "Customer name",
+        customerNameHint: "Visible label used in cards and tables.",
+        plan: "Plan",
+        planHint: "Which package the customer is on.",
+        customerStatusHint: "Where the account sits in the lifecycle.",
+        arrHint: "Annual recurring revenue in USD.",
+        health: "Health",
+        healthHint: "How healthy the relationship currently feels.",
+        contacts: "Contacts",
+        contactsHint: "How many people are attached to the account.",
+        region: "Region",
+        regionHint: "Useful for segmenting the customer list.",
+        notes: "Notes",
+        notesHint: "Short context worth keeping for later.",
+        notesPlaceholder: "Short note about this customer"
+      };
+
   switch (state.createType) {
     case "deal":
       return `
         <form class="control-form" data-create-form="deal">
-          <div class="form-note">Use this when you want something to appear in the sales pipeline right away.</div>
+          <div class="form-note">${safe(copy.workspaceStart)}</div>
           <div class="field-grid">
-            ${renderField("Company", `<input name="company" placeholder="Acme Labs" required />`, "Which account this opportunity belongs to.")}
-            ${renderField("Deal title", `<input name="title" placeholder="Expansion package" required />`, "Short readable name for the opportunity.")}
-            ${renderField("Owner", `<input name="owner" placeholder="Ava Patel" required />`, "Person responsible for moving the deal.")}
-            ${renderField("Value", `<input name="value" type="number" min="0" placeholder="12000" required />`, "Expected contract value in USD.")}
+            ${renderField(formCopy.company, `<input name="company" placeholder="${safe(formCopy.companyPlaceholder)}" required />`, formCopy.companyHint)}
+            ${renderField(formCopy.dealTitle, `<input name="title" placeholder="${safe(formCopy.dealTitlePlaceholder)}" required />`, formCopy.dealTitleHint)}
+            ${renderField(formCopy.owner, `<input name="owner" placeholder="${safe(formCopy.ownerPlaceholder)}" required />`, formCopy.ownerHint)}
+            ${renderField(formCopy.value, `<input name="value" type="number" min="0" placeholder="12000" required />`, formCopy.valueHint)}
             ${renderField(
-              "Stage",
-              `<select name="stage">${dealStages.map((stage) => `<option value="${stage}">${stage}</option>`).join("")}</select>`,
-              "Current place in the pipeline."
+              formCopy.stage,
+              `<select name="stage">${dealStages.map((stage) => `<option value="${stage}">${safe(translateValue(copy, stage))}</option>`).join("")}</select>`,
+              formCopy.stageHint
             )}
-            ${renderField("Due date", `<input name="dueDate" type="date" required />`, "When this opportunity should move next.")}
-            ${renderField("Probability", `<input name="probability" type="number" min="0" max="100" value="55" required />`, "Confidence level from 0 to 100.")}
+            ${renderField(formCopy.dueDate, `<input name="dueDate" type="date" required />`, formCopy.dueDateHint)}
+            ${renderField(formCopy.probability, `<input name="probability" type="number" min="0" max="100" value="55" required />`, formCopy.probabilityHint)}
             ${renderField(
-              "Deal type",
+              formCopy.dealType,
               `<select name="type">
-                <option value="New Biz">New Biz</option>
-                <option value="Expansion">Expansion</option>
+                <option value="New Biz">${safe(translateValue(copy, "New Biz"))}</option>
+                <option value="Expansion">${safe(translateValue(copy, "Expansion"))}</option>
                 <option value="Enterprise">Enterprise</option>
-                <option value="Renewal">Renewal</option>
+                <option value="Renewal">${safe(translateValue(copy, "Renewal"))}</option>
               </select>`,
-              "Helps separate new sales from renewals and expansions."
+              formCopy.dealTypeHint
             )}
           </div>
-          <button class="primary-button" type="submit">Create deal</button>
+          <button class="primary-button" type="submit">${safe(copy.createDeal)}</button>
         </form>
       `;
     case "task":
       return `
         <form class="control-form" data-create-form="task">
-          <div class="form-note">Use tasks for next actions. This is the clearest way to make the workspace feel alive after customers or deals.</div>
+          <div class="form-note">${safe(copy.workspaceStart)}</div>
           <div class="field-grid">
-            ${renderField("Task title", `<input name="title" placeholder="Review proposal before call" required />`, "Action-oriented wording works best here.")}
-            ${renderField("Related customer", `<input name="customer" placeholder="Northstar Labs" required />`, "Optional in a real product, but useful for this MVP view.")}
-            ${renderField("Assignee", `<input name="assignee" placeholder="Jade Carter" required />`, "Who owns this action item.")}
+            ${renderField(formCopy.taskTitle, `<input name="title" placeholder="${safe(formCopy.taskTitlePlaceholder)}" required />`, formCopy.taskTitleHint)}
+            ${renderField(formCopy.relatedCustomer, `<input name="customer" placeholder="${safe(formCopy.companyPlaceholder)}" required />`, formCopy.relatedCustomerHint)}
+            ${renderField(formCopy.assignee, `<input name="assignee" placeholder="${safe(formCopy.assigneePlaceholder)}" required />`, formCopy.assigneeHint)}
             ${renderField(
-              "Priority",
+              formCopy.priority,
               `<select name="priority">
-                <option value="High">High</option>
-                <option value="Medium" selected>Medium</option>
-                <option value="Low">Low</option>
+                <option value="High">${safe(translateValue(copy, "High"))}</option>
+                <option value="Medium" selected>${safe(translateValue(copy, "Medium"))}</option>
+                <option value="Low">${safe(translateValue(copy, "Low"))}</option>
               </select>`,
-              "Controls urgency styling."
+              formCopy.priorityHint
             )}
             ${renderField(
-              "Status",
+              formCopy.status,
               `<select name="status">
-                <option value="Open">Open</option>
-                <option value="In Progress">In Progress</option>
-                <option value="Blocked">Blocked</option>
-                <option value="Done">Done</option>
+                <option value="Open">${safe(translateValue(copy, "Open"))}</option>
+                <option value="In Progress">${safe(translateValue(copy, "In Progress"))}</option>
+                <option value="Blocked">${safe(translateValue(copy, "Blocked"))}</option>
+                <option value="Done">${safe(translateValue(copy, "Done"))}</option>
               </select>`,
-              "How far along the task already is."
+              formCopy.statusHint
             )}
-            ${renderField("Due date", `<input name="dueDate" type="date" required />`, "When it should be completed.")}
+            ${renderField(formCopy.dueDate, `<input name="dueDate" type="date" required />`, formCopy.dueDateHint)}
             ${renderField(
-              "Lane",
+              formCopy.lane,
               `<select name="lane">
-                <option value="Today">Today</option>
-                <option value="This Week" selected>This Week</option>
-                <option value="Completed">Completed</option>
+                <option value="Today">${safe(translateValue(copy, "Today"))}</option>
+                <option value="This Week" selected>${safe(translateValue(copy, "This Week"))}</option>
+                <option value="Completed">${safe(translateValue(copy, "Completed"))}</option>
               </select>`,
-              "Where it appears in the workload snapshot."
+              formCopy.laneHint
             )}
           </div>
-          <button class="primary-button" type="submit">Create task</button>
+          <button class="primary-button" type="submit">${safe(copy.createTask)}</button>
         </form>
       `;
     case "invoice":
       return `
         <form class="control-form" data-create-form="invoice">
-          <div class="form-note">Invoices are best once you already have customers or deals. They complete the billing story.</div>
+          <div class="form-note">${safe(copy.workspaceStart)}</div>
           <div class="field-grid">
-            ${renderField("Company", `<input name="company" placeholder="Orbit Education" required />`, "The account this invoice belongs to.")}
-            ${renderField("Amount", `<input name="amount" type="number" min="0" placeholder="1800" required />`, "Invoice amount in USD.")}
-            ${renderField("Due date", `<input name="dueDate" type="date" required />`, "Used to surface upcoming and overdue billing.")}
+            ${renderField(formCopy.company, `<input name="company" placeholder="Orbit Education" required />`, formCopy.companyHint)}
+            ${renderField(formCopy.amount, `<input name="amount" type="number" min="0" placeholder="1800" required />`, formCopy.amountHint)}
+            ${renderField(formCopy.dueDate, `<input name="dueDate" type="date" required />`, formCopy.dueDateHint)}
             ${renderField(
-              "Status",
+              formCopy.status,
               `<select name="status">
-                <option value="Pending">Pending</option>
-                <option value="Paid">Paid</option>
-                <option value="Overdue">Overdue</option>
+                <option value="Pending">${safe(translateValue(copy, "Pending"))}</option>
+                <option value="Paid">${safe(translateValue(copy, "Paid"))}</option>
+                <option value="Overdue">${safe(translateValue(copy, "Overdue"))}</option>
               </select>`,
-              "Choose how finance should read this line item."
+              formCopy.invoiceStatusHint
             )}
           </div>
-          <button class="primary-button" type="submit">Create invoice</button>
+          <button class="primary-button" type="submit">${safe(copy.createInvoice)}</button>
         </form>
       `;
     default:
       return `
         <form class="control-form" data-create-form="customer">
-          <div class="form-note">Best first record. Once a customer exists, the rest of the product becomes much easier to understand.</div>
+          <div class="form-note">${safe(copy.workspaceStart)}</div>
           <div class="field-grid">
-            ${renderField("Customer name", `<input name="name" placeholder="Northstar Labs" required />`, "Visible name used in cards, tables and drawers.")}
-            ${renderField("Company", `<input name="company" placeholder="Northstar Labs Inc." required />`, "Company or account name.")}
-            ${renderField("Owner", `<input name="owner" placeholder="Elena Torres" required />`, "Who manages the account relationship.")}
+            ${renderField(formCopy.customerName, `<input name="name" placeholder="${safe(formCopy.companyPlaceholder)}" required />`, formCopy.customerNameHint)}
+            ${renderField(formCopy.company, `<input name="company" placeholder="Northstar Labs Inc." required />`, formCopy.companyHint)}
+            ${renderField(formCopy.owner, `<input name="owner" placeholder="${safe(formCopy.ownerPlaceholder)}" required />`, formCopy.ownerHint)}
             ${renderField(
-              "Plan",
+              formCopy.plan,
               `<select name="plan">
                 <option value="Starter">Starter</option>
                 <option value="Growth" selected>Growth</option>
                 <option value="Enterprise">Enterprise</option>
               </select>`,
-              "Which package the customer is on."
+              formCopy.planHint
             )}
             ${renderField(
-              "Status",
+              formCopy.status,
               `<select name="status">
-                <option value="New">New</option>
-                <option value="Qualified">Qualified</option>
-                <option value="Customer">Customer</option>
-                <option value="Churned">Churned</option>
+                <option value="New">${safe(translateValue(copy, "New"))}</option>
+                <option value="Qualified">${safe(translateValue(copy, "Qualified"))}</option>
+                <option value="Customer">${safe(translateValue(copy, "Customer"))}</option>
+                <option value="Churned">${safe(translateValue(copy, "Churned"))}</option>
               </select>`,
-              "Where the account sits in the lifecycle."
+              formCopy.customerStatusHint
             )}
-            ${renderField("ARR", `<input name="arr" type="number" min="0" placeholder="24000" required />`, "Annual recurring revenue in USD.")}
+            ${renderField("ARR", `<input name="arr" type="number" min="0" placeholder="24000" required />`, formCopy.arrHint)}
             ${renderField(
-              "Health",
+              formCopy.health,
               `<select name="health">
-                <option value="Warm">Warm</option>
-                <option value="Strong">Strong</option>
-                <option value="Watch">Watch</option>
-                <option value="Critical">Critical</option>
+                <option value="Warm">${safe(translateValue(copy, "Warm"))}</option>
+                <option value="Strong">${safe(translateValue(copy, "Strong"))}</option>
+                <option value="Watch">${safe(translateValue(copy, "Watch"))}</option>
+                <option value="Critical">${safe(translateValue(copy, "Critical"))}</option>
               </select>`,
-              "How healthy the relationship currently feels."
+              formCopy.healthHint
             )}
-            ${renderField("Contacts", `<input name="contacts" type="number" min="1" value="1" required />`, "How many people are attached to the account.")}
-            ${renderField("Region", `<input name="region" placeholder="US West" required />`, "Useful for segmenting the customer list.")}
-            ${renderField("Notes", `<textarea name="notes" rows="4" placeholder="Short note about this customer"></textarea>`, "Context you want to remember when reopening the drawer.")}
+            ${renderField(formCopy.contacts, `<input name="contacts" type="number" min="1" value="1" required />`, formCopy.contactsHint)}
+            ${renderField(formCopy.region, `<input name="region" placeholder="US West" required />`, formCopy.regionHint)}
+            ${renderField(formCopy.notes, `<textarea name="notes" rows="4" placeholder="${safe(formCopy.notesPlaceholder)}"></textarea>`, formCopy.notesHint)}
           </div>
-          <button class="primary-button" type="submit">Create customer</button>
+          <button class="primary-button" type="submit">${safe(copy.createCustomer)}</button>
         </form>
       `;
   }
@@ -694,7 +1111,7 @@ function renderCreateForm(state) {
 
 export function renderControl(data, state) {
   const empty = isWorkspaceEmpty(data);
-  const copy = getCopy(state.language);
+  const copy = getViewCopy(state.language);
   const activeType = copy.createTypes.find((type) => type.id === state.createType) || copy.createTypes[0];
 
   return `
@@ -702,18 +1119,13 @@ export function renderControl(data, state) {
       <article class="control-hero">
         <span class="label">${safe(copy.controlCenter)}</span>
         <h3>${safe(copy.everythingStarts)}</h3>
-        <p>Use this screen only for creation and workspace editing. The horizontal menu above is now purely for browsing and interacting with records.</p>
-        <div class="control-steps">
-          <div class="control-step"><strong>Start with a customer</strong><span>Best first record if you want the app to make immediate sense.</span></div>
-          <div class="control-step"><strong>Then add a deal or task</strong><span>This gives the pipeline and execution sections something real to render.</span></div>
-          <div class="control-step"><strong>Use invoices last</strong><span>They make the billing area feel complete once the rest exists.</span></div>
-        </div>
+        <p>${safe(copy.workspaceStart)}</p>
       </article>
       <article class="control-panel">
         <div class="section-header">
           <div>
             <h3>${safe(copy.createRecord)}</h3>
-            <p>Select the type, fill the form, and the empty onboarding state will disappear automatically.</p>
+            <p>${safe(copy.workspaceStart)}</p>
           </div>
         </div>
         <div class="control-current">
@@ -739,26 +1151,27 @@ export function renderControl(data, state) {
         <div class="section-header">
           <div>
             <h3>${safe(copy.workspaceStatus)}</h3>
-            <p>${empty ? "You are starting from a clean state." : "You already have live records in this workspace."}</p>
+            <p>${safe(empty ? copy.workspaceStart : copy.workspaceReady)}</p>
           </div>
         </div>
         <div class="key-metrics">
-          <div class="metric-pill"><span>Customers</span><strong>${data.customers.length}</strong></div>
-          <div class="metric-pill"><span>Deals</span><strong>${data.deals.length}</strong></div>
-          <div class="metric-pill"><span>Tasks</span><strong>${data.tasks.length}</strong></div>
-          <div class="metric-pill"><span>Invoices</span><strong>${data.invoices.length}</strong></div>
+          <div class="metric-pill"><span>${safe(copy.customersShort)}</span><strong>${data.customers.length}</strong></div>
+          <div class="metric-pill"><span>${safe(copy.dealsShort)}</span><strong>${data.deals.length}</strong></div>
+          <div class="metric-pill"><span>${safe(copy.tasksShort)}</span><strong>${data.tasks.length}</strong></div>
+          <div class="metric-pill"><span>${safe(copy.invoicesShort)}</span><strong>${data.invoices.length}</strong></div>
         </div>
       </article>
     </section>
   `;
 }
 
-function renderDrawerActions(type, entity) {
+function renderDrawerActions(type, entity, language) {
+  const copy = getViewCopy(language);
   const label = entity.title || entity.name || entity.company || entity.id;
 
   return `
     <div class="drawer__actions">
-      <button class="ghost-button" data-close-drawer="true" type="button">Close</button>
+      <button class="ghost-button" data-close-drawer="true" type="button">${safe(copy.close)}</button>
       <button
         class="ghost-button danger-ghost-button"
         data-request-delete="${safe(type)}"
@@ -766,19 +1179,20 @@ function renderDrawerActions(type, entity) {
         data-name="${safe(label)}"
         type="button"
       >
-        Delete record
+        ${safe(copy.deleteRecord)}
       </button>
     </div>
   `;
 }
 
-export function renderDrawer(data, drawer) {
+export function renderDrawer(data, drawer, language = "en") {
   if (!drawer) {
     return "";
   }
 
   let entity = null;
   let content = "";
+  const copy = getViewCopy(language);
 
   if (drawer.type === "customer") {
     entity = data.customers.find((item) => item.id === drawer.id);
@@ -790,17 +1204,17 @@ export function renderDrawer(data, drawer) {
         <span>${safe(entity.plan)}</span>
       </div>
       <div class="drawer__section">
-        <h4>Account Snapshot</h4>
+        <h4>${safe(copy.accountSnapshot)}</h4>
         <div class="key-metrics">
-          <div class="metric-pill"><span>Status</span>${renderBadge(entity.status)}</div>
+          <div class="metric-pill"><span>${safe(copy.status)}</span>${renderBadge(entity.status, copy)}</div>
           <div class="metric-pill"><span>ARR</span><strong>${formatCurrency(entity.arr)}</strong></div>
-          <div class="metric-pill"><span>Health</span>${renderBadge(entity.health)}</div>
-          <div class="metric-pill"><span>Last activity</span><strong>${formatDate(entity.lastActivity)}</strong></div>
+          <div class="metric-pill"><span>${safe(copy.health)}</span>${renderBadge(entity.health, copy)}</div>
+          <div class="metric-pill"><span>${safe(copy.recentActivity)}</span><strong>${formatDate(entity.lastActivity)}</strong></div>
         </div>
       </div>
       <div class="drawer__section">
-        <h4>Notes</h4>
-        <p class="muted">${safe(entity.notes || "No notes yet.")}</p>
+        <h4>${safe(copy.notes)}</h4>
+        <p class="muted">${safe(entity.notes || copy.noNotesYet)}</p>
       </div>
     `;
   }
@@ -815,17 +1229,13 @@ export function renderDrawer(data, drawer) {
         <span>${safe(entity.type)}</span>
       </div>
       <div class="drawer__section">
-        <h4>Deal Snapshot</h4>
+        <h4>${safe(copy.dealSnapshot)}</h4>
         <div class="key-metrics">
-          <div class="metric-pill"><span>Stage</span>${renderBadge(entity.stage)}</div>
-          <div class="metric-pill"><span>Value</span><strong>${formatCurrency(entity.value)}</strong></div>
-          <div class="metric-pill"><span>Probability</span><strong>${entity.probability}%</strong></div>
-          <div class="metric-pill"><span>Due date</span><strong>${formatDate(entity.dueDate)}</strong></div>
+          <div class="metric-pill"><span>${safe(copy.stageLabel)}</span>${renderBadge(entity.stage, copy)}</div>
+          <div class="metric-pill"><span>${safe(copy.value)}</span><strong>${formatCurrency(entity.value)}</strong></div>
+          <div class="metric-pill"><span>${safe(copy.probabilityLabel)}</span><strong>${entity.probability}%</strong></div>
+          <div class="metric-pill"><span>${safe(copy.dueDate)}</span><strong>${formatDate(entity.dueDate)}</strong></div>
         </div>
-      </div>
-      <div class="drawer__section">
-        <h4>Why this matters</h4>
-        <p class="muted">Drag and drop between stages gives the pipeline section a real workflow feel even before CRUD persistence is fully expanded.</p>
       </div>
     `;
   }
@@ -840,16 +1250,12 @@ export function renderDrawer(data, drawer) {
         <span>${safe(entity.lane)}</span>
       </div>
       <div class="drawer__section">
-        <h4>Task Snapshot</h4>
+        <h4>${safe(copy.taskSnapshot)}</h4>
         <div class="key-metrics">
-          <div class="metric-pill"><span>Status</span>${renderBadge(entity.status)}</div>
-          <div class="metric-pill"><span>Priority</span>${renderBadge(entity.priority)}</div>
-          <div class="metric-pill"><span>Due date</span><strong>${formatDate(entity.dueDate)}</strong></div>
+          <div class="metric-pill"><span>${safe(copy.status)}</span>${renderBadge(entity.status, copy)}</div>
+          <div class="metric-pill"><span>${safe(copy.priority)}</span>${renderBadge(entity.priority, copy)}</div>
+          <div class="metric-pill"><span>${safe(copy.dueDate)}</span><strong>${formatDate(entity.dueDate)}</strong></div>
         </div>
-      </div>
-      <div class="drawer__section">
-        <h4>Execution note</h4>
-        <p class="muted">This drawer is where comments, assignee context and future checklist logic can grow later.</p>
       </div>
     `;
   }
@@ -864,16 +1270,12 @@ export function renderDrawer(data, drawer) {
         <span>${formatDate(entity.dueDate)}</span>
       </div>
       <div class="drawer__section">
-        <h4>Invoice Snapshot</h4>
+        <h4>${safe(copy.invoiceSnapshot)}</h4>
         <div class="key-metrics">
-          <div class="metric-pill"><span>Status</span>${renderBadge(entity.status)}</div>
-          <div class="metric-pill"><span>Amount</span><strong>${formatCurrency(entity.amount)}</strong></div>
-          <div class="metric-pill"><span>Due date</span><strong>${formatDate(entity.dueDate)}</strong></div>
+          <div class="metric-pill"><span>${safe(copy.status)}</span>${renderBadge(entity.status, copy)}</div>
+          <div class="metric-pill"><span>${safe(copy.amount)}</span><strong>${formatCurrency(entity.amount)}</strong></div>
+          <div class="metric-pill"><span>${safe(copy.dueDate)}</span><strong>${formatDate(entity.dueDate)}</strong></div>
         </div>
-      </div>
-      <div class="drawer__section">
-        <h4>Billing note</h4>
-        <p class="muted">Keep invoices here when you want the billing screen to show real collection pressure instead of placeholder guidance.</p>
       </div>
     `;
   }
@@ -884,12 +1286,12 @@ export function renderDrawer(data, drawer) {
       <div class="drawer__header">
         <div>
           <h3>${safe(entity.title || entity.name || entity.company || entity.id)}</h3>
-          <p class="muted">Detail drawer for fast context without leaving the current page.</p>
+          <p class="muted">${safe(copy.customerAccountsBody)}</p>
         </div>
-        <span class="drawer__eyebrow">${safe(drawer.type)}</span>
+        <span class="drawer__eyebrow">${safe(copy.recordTypeLabels?.[drawer.type] || drawer.type)}</span>
       </div>
       ${content}
-      ${renderDrawerActions(drawer.type, entity)}
+      ${renderDrawerActions(drawer.type, entity, language)}
     </aside>
   `;
 }
