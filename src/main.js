@@ -780,7 +780,7 @@ async function confirmSignOut() {
       loading: false,
       booting: false
     });
-    flashToast(t(store.state, "signedOut"));
+    window.location.replace(window.location.pathname);
   } catch (error) {
     store.setState({ loading: false, booting: false });
     flashToast(error.message);
