@@ -447,8 +447,8 @@ function renderConfirmDialog(state) {
   }
 
   return `
-    <div class="confirm-overlay" data-confirm-dismiss="true">
-      <div class="confirm-card" role="dialog" aria-modal="true" aria-label="${escape(state.confirmDialog.title)}" onclick="event.stopPropagation()">
+    <div class="confirm-overlay" data-confirm-backdrop="true">
+      <div class="confirm-card" role="dialog" aria-modal="true" aria-label="${escape(state.confirmDialog.title)}">
         <span class="label">Confirm action</span>
         <h3>${escape(state.confirmDialog.title)}</h3>
         <p class="muted">${escape(state.confirmDialog.message)}</p>
@@ -796,7 +796,7 @@ document.addEventListener("click", (event) => {
   }
 
   const target = event.target.closest(
-    "[data-nav], [data-open-drawer], [data-close-drawer], [data-theme-toggle], [data-open-control], [data-profile-toggle], [data-request-signout], [data-toggle-auth], [data-sync-data], [data-oauth-provider], [data-create-type], [data-confirm-action], [data-confirm-dismiss], [data-language-switch]"
+    "[data-nav], [data-open-drawer], [data-close-drawer], [data-theme-toggle], [data-open-control], [data-profile-toggle], [data-request-signout], [data-toggle-auth], [data-sync-data], [data-oauth-provider], [data-create-type], [data-confirm-action], [data-confirm-dismiss], [data-confirm-backdrop], [data-language-switch]"
   );
 
   if (!target) {
@@ -873,7 +873,7 @@ document.addEventListener("click", (event) => {
     return;
   }
 
-  if (target.dataset.confirmDismiss) {
+  if (target.dataset.confirmDismiss || target.dataset.confirmBackdrop) {
     store.setState({ confirmDialog: null });
     return;
   }
