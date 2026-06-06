@@ -62,7 +62,7 @@ export async function signUpWithPassword(email, password) {
 
 export async function signOut() {
   ensureClient();
-  const { error } = await supabaseClient.auth.signOut();
+  const { error } = await supabaseClient.auth.signOut({ scope: "local" });
   if (error) {
     throw error;
   }
