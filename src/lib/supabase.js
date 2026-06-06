@@ -185,6 +185,14 @@ export async function insertRecord(table, payload) {
   return data;
 }
 
+export async function deleteRecord(table, id) {
+  ensureClient();
+  const { error } = await supabaseClient.from(table).delete().eq("id", id);
+  if (error) {
+    throw error;
+  }
+}
+
 export async function updateDealStage(dealId, stage) {
   ensureClient();
   const { error } = await supabaseClient.from("deals").update({ stage }).eq("id", dealId);
