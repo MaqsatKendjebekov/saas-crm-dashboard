@@ -780,7 +780,9 @@ async function confirmSignOut() {
       loading: false,
       booting: false
     });
-    window.location.replace(window.location.pathname);
+    const cleanUrl = `${window.location.origin}${window.location.pathname}`;
+    window.history.replaceState({}, window.document.title, window.location.pathname);
+    window.location.replace(cleanUrl);
   } catch (error) {
     store.setState({ loading: false, booting: false });
     flashToast(error.message);
